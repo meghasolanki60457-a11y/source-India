@@ -10,8 +10,8 @@ import Home from "./pages/Home";
 import Category from "./pages/Category";
 
 // Components (as pages)
-import Hardware from "./components/Hardware";
-import Industries from "./components/Industries";
+import Hardware from "./Components/Hardware";
+import Industries from "./Components/Industries";
 
 function App() {
   return (
