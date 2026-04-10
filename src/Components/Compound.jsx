@@ -8,6 +8,14 @@ const Compound = () => {
 
   const BASE_URL = "https://react-live.sourceindia-electronics.com/v1";
 
+  // ✅ SLUG FUNCTION
+  const createSlug = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
+  };
+
   useEffect(() => {
     fetch(
       "https://react-live.sourceindia-electronics.com/v1/api/categories/category-item?is_delete=0&status=1&limit=6&is_home=1"
@@ -18,14 +26,13 @@ const Compound = () => {
           ? data
           : data?.data || data?.result || [];
 
-        const selected = list[0]; // or use: list.find(i => i.id == 7)
+        const selected = list[0];
 
         if (!selected) return;
 
         setCategory({
           id: selected.id,
           name: selected.name,
-
           image: selected.file_name
             ? `${BASE_URL}/${selected.file_name}`
             : "/nine.png",
@@ -34,11 +41,9 @@ const Compound = () => {
             selected.subcategories?.map((sub) => ({
               id: sub.id,
               name: sub.name,
-
               image: sub.file_name
                 ? `${BASE_URL}/${sub.file_name}`
                 : "/nine.png",
-
               sub_categories:
                 sub.item_categories?.map((item) => ({
                   id: item.id,
@@ -55,90 +60,47 @@ const Compound = () => {
   return (
     <section className="category-section py-5">
       <div className="container">
-
         <div className="row gy-4">
 
           {/* LEFT IMAGE */}
-          <div className="col-lg-4 position-relative">
-            <div className="left-card">
-
-              <img
-                src={category.image}
-                alt={category.name}
-                style={{
-                  width: "100%",
-                  borderRadius: "10px",
-                  objectFit: "cover",
-                }}
-              />
-
-              <button className="btn view-btn mt-3">
-                View All
-              </button>
-            </div>
+          <div className="col-lg-4">
+            <img src={category.image} alt={category.name} width="100%" />
           </div>
 
           {/* RIGHT SIDE */}
           <div className="col-lg-8">
-
-            {/* HEADING */}
             <h2 className="fw-bold mb-4">{category.name}</h2>
 
             <div className="row gy-4">
-
               {category.subcategories.map((item) => (
                 <div className="col-md-6" key={item.id}>
-                  <div className="category-card d-flex justify-content-between align-items-center p-3 rounded shadow-sm bg-white">
+                  <div className="category-card d-flex justify-content-between p-3 bg-white shadow-sm">
 
-                    {/* TEXT */}
                     <div>
-                      <div className="d-flex align-items-center justify-content-between mb-2">
-                        <h5 style={{ color: "#0d3b66" }}>
-                          {item.name}
-                        </h5>
+                      <div className="d-flex justify-content-between align-items-center">
 
-                        {/* 🔥 ARROW ICON */}
+                        <h5>{item.name}</h5>
+
+                        {/* ✅ FIXED CLICK */}
                         <FaArrowRight
-                          onClick={() => navigate(`/category/${item.id}`)}
-                          style={{
-                            color: "#0d3b66",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                          }}
+                          onClick={() =>
+                            navigate(
+                              `/category/${createSlug(item.name)}`,
+                              { state: { id: item.id } }
+                            )
+                          }
+                          style={{ cursor: "pointer" }}
                         />
                       </div>
-
-                      <ul style={{ listStyle: "none", padding: 0 }}>
-                        {item.sub_categories.slice(0, 4).map((sub) => (
-                          <li
-                            key={sub.id}
-                            style={{ color: "#d4423e", fontSize: "14px" }}
-                          >
-                            {sub.name}
-                          </li>
-                        ))}
-                      </ul>
                     </div>
 
-                    {/* IMAGE */}
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      style={{
-                        width: "100px",
-                        height: "70px",
-                        objectFit: "contain",
-                        borderRadius: "8px",
-                      }}
-                      onError={(e) => (e.target.src = "/nine.png")}
-                    />
+                    <img src={item.image} alt="" width="80" />
                   </div>
                 </div>
               ))}
-
             </div>
-          </div>
 
+          </div>
         </div>
       </div>
     </section>

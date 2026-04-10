@@ -6,32 +6,34 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 
 // Pages
-import Home from "./pages/Home";
-import Category from "./pages/Category";
+import Home from "./Pages/Home";
+import Category from "./Pages/Category";
+import CategoryDetails from "./Pages/CategoryDetails";
 
-// Components (as pages)
+// Components
 import Hardware from "./Components/Hardware";
 import Industries from "./Components/Industries";
 
 function App() {
   return (
     <>
-      {/* HEADER */}
       <Header />
 
-      {/* ROUTES */}
       <Routes>
         <Route path="/" element={<Home />} />
+
         <Route path="/category" element={<Category />} />
+        <Route path="/category/:name" element={<CategoryDetails />} />
+
         <Route path="/hardware" element={<Hardware />} />
         <Route path="/industries" element={<Industries />} />
         <Route path="/event" element={<h1>Event Page</h1>} />
         <Route path="/enquiry" element={<h1>Enquiry Page</h1>} />
         <Route path="/companies/:id" element={<h1>Company Details Page</h1>} />
+
         <Route path="*" element={<h1>404 Page Not Found</h1>} />
       </Routes>
 
-      {/* FOOTER */}
       <Footer />
     </>
   );
