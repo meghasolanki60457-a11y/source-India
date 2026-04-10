@@ -1,5 +1,5 @@
 import React from "react";
-import Circuit from "../Components/Circuit";
+import Circuit from "../components/Circuit";
 
 const Pcb = () => {
   return (
