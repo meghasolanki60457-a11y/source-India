@@ -6,6 +6,7 @@ import Magnet from "../Components/Magnet";
 import Divide from "../Components/Divide";
 import Capacitor from "../Components/Capacitor";
 import Circuit from "../Components/Circuit";
+import Quality from "../Components/Quality";
 
 
 function CategoryDetails() {
@@ -43,6 +44,11 @@ function CategoryDetails() {
   if (name === "pcb") {
     return (
       < Circuit />
+    );
+  }
+   if (name === "automotive-electronics") {
+    return (
+      < Quality />
     );
   }
   

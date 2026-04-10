@@ -9,6 +9,7 @@ import Footer from "./Components/Footer";
 import Home from "./Pages/Home";
 import Category from "./Pages/Category";
 import CategoryDetails from "./Pages/CategoryDetails";
+import Subcategory from "./Pages/Subcategory";
 
 // Components
 import Hardware from "./Components/Hardware";
@@ -28,6 +29,7 @@ function App() {
 
         <Route path="/category" element={<Category />} />
         <Route path="/category/:name" element={<CategoryDetails />} />
+        <Route path="/Subcategory/:name" element={<Subcategory />} />
 
         <Route path="/hardware" element={<Hardware />} />
         <Route path="/industries" element={<Industries />} />

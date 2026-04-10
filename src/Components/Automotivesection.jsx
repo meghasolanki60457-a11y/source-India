@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AutomotiveSection = () => {
   const [data, setData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(
@@ -10,7 +12,7 @@ const AutomotiveSection = () => {
       .then((res) => res.json())
       .then((res) => {
         console.log("API RESPONSE 👉", res);
-        setData(res.subcategory); // ✅ correct path
+        setData(res.subcategory); // ✅ correct path (UNCHANGED)
       })
       .catch((err) => console.log(err));
   }, []);
@@ -19,6 +21,11 @@ const AutomotiveSection = () => {
   if (!data) {
     return <h3 className="text-center mt-5">Loading...</h3>;
   }
+
+  // 👉 NAVIGATION FUNCTION
+  const handleOpen = (slug) => {
+    navigate(`/category/${slug}`);
+  };
 
   return (
     <div className="container py-4">
@@ -41,22 +48,29 @@ const AutomotiveSection = () => {
             <h5 className="text-primary fw-bold">
               {category.name} ({category.product_count})
             </h5>
-            <span style={{ cursor: "pointer" }}>→</span>
+
+            {/* 👉 CLICKABLE ARROW */}
+            <span
+              style={{ cursor: "pointer", fontSize: "20px" }}
+              onClick={() => handleOpen(category.slug)}
+            >
+              →
+            </span>
           </div>
 
-          {/* 🔹 Items */}
+          {/* 🔹 Items (UNCHANGED) */}
           <div className="row g-3">
 
             {category.items?.map((item) => (
               <div key={item.id} className="col-md-3">
                 <div className="border rounded p-2 text-center h-100">
 
-                  {/* ✅ IMAGE (FIXED) */}
-          <img
-  src={`https://react-live.sourceindia-electronics.com/v1/${item.file_name}`}
-  alt={item.name}
-  className="img-fluid mb-2"
-/>
+                  {/* ✅ IMAGE (UNCHANGED) */}
+                  <img
+                    src={`https://react-live.sourceindia-electronics.com/v1/${item.file_name}`}
+                    alt={item.name}
+                    className="img-fluid mb-2"
+                  />
 
                   {/* ✅ NAME */}
                   <p className="fw-semibold small mb-1">
