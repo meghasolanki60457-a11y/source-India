@@ -6,9 +6,9 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 
 // Pages
-import Home from "./pages/Home";
-import Category from "./pages/Category";
-import CategoryDetails from "../pages/CategoryDetails";
+import Home from "./Pages/Home";
+import Category from "./Pages/Category";
+import CategoryDetails from "./Pages/CategoryDetails";
 
 // Components
 import Hardware from "./components/Hardware";
