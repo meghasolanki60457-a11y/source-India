@@ -1,5 +1,5 @@
 import React from "react";
-import Display from "./components/Divide";
+import Display from "./Components/Divide";
 
 const Optoelectronics = () => {
   return (

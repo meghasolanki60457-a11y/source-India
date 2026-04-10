@@ -2,8 +2,8 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 // Components (IMPORTANT: folder name case must match exactly)
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import Header from "./Components/Header";
+import Footer from "./Components/Footer";
 
 // Pages
 import Home from "./Pages/Home";
@@ -11,8 +11,8 @@ import Category from "./Pages/Category";
 import CategoryDetails from "./Pages/CategoryDetails";
 
 // Components
-import Hardware from "./components/Hardware";
-import Industries from "./components/Industries";
+import Hardware from "./Components/Hardware";
+import Industries from "./Components/Industries";
 
 function App() {
   console.log("App loaded successfully");

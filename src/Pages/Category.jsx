@@ -1,10 +1,10 @@
 import React from "react";
 
-import Compound from "../components/Compound";
-import Electronic from "../components/Electronic";
-import Finishedproduct from "../components/Finishedproduct";
-import Manufacturing from "../components/Manufacturing";
-import Hardware from "../components/Hardware";
+import Compound from "../Components/Compound";
+import Electronic from "../Components/Electronic";
+import Finishedproduct from "../Components/Finishedproduct";
+import Manufacturing from "../Components/Manufacturing";
+import Hardware from "../Components/Hardware";
 
 function Category() {
   return (

@@ -1,5 +1,5 @@
 import React from "react";
-import Magnet from "./components/Magnet";
+import Magnet from "./Components/Magnet";
 
 const Ferritis = () => {
   return (

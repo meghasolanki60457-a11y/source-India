@@ -1,13 +1,13 @@
 import React from "react";
 
-import Hero from "../components/Hero";
-import Latestproduct from "../components/Latestproduct";
-import Compound from "../components/Compound";
-import Electronic from "../components/Electronic";
-import Finishedproduct from "../components/Finishedproduct";
-import Hardware from "../components/Hardware";
-import Industries from "../components/Industries";
-import Featured from "../components/Featured";
+import Hero from "../Components/Hero";
+import Latestproduct from "../Components/Latestproduct";
+import Compound from "../Components/Compound";
+import Electronic from "../Components/Electronic";
+import Finishedproduct from "../Components/Finishedproduct";
+import Hardware from "../Components/Hardware";
+import Industries from "../Components/Industries";
+import Featured from "../Components/Featured";
 
 function Home() {
   return (
