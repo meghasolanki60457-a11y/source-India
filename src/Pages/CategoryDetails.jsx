@@ -1,11 +1,11 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import Automotivesection from "../components/Automotivesection";
-import Mechanical from "../components/Mechanical";
-import Magnet from "../components/Magnet";
-import Divide from "../components/Divide";
-import Capacitor from "../components/Capacitor";
-import Circuit from "../components/Circuit";
+import Automotivesection from "./components/Automotivesection";
+import Mechanical from "./components/Mechanical";
+import Magnet from "./components/Magnet";
+import Divide from "./components/Divide";
+import Capacitor from "./components/Capacitor";
+import Circuit from "./components/Circuit";
 
 
 function CategoryDetails() {

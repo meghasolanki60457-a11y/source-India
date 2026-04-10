@@ -1,5 +1,5 @@
 import React from "react";
-import Capacitor from "../components/Capacitor";
+import Capacitor from "./components/Capacitor";
 
 const Passive = () => {
   return (

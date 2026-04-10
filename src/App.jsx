@@ -8,7 +8,7 @@ import Footer from "./components/Footer";
 // Pages
 import Home from "./pages/Home";
 import Category from "./pages/Category";
-import CategoryDetails from "./pages/CategoryDetails";
+import CategoryDetails from "../pages/CategoryDetails";
 
 // Components
 import Hardware from "./components/Hardware";

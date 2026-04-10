@@ -1,5 +1,5 @@
 import React from "react";
-import Mechanical from "../components/Mechanical";
+import Mechanical from "./components/Mechanical";
 
 const Electromechanical = () => {
   return (
