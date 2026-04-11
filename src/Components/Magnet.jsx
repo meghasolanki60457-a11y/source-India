@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 
 const FerritesMagnets = () => {
   const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(
@@ -12,7 +13,6 @@ const FerritesMagnets = () => {
       .then((data) => {
         console.log("API RESPONSE:", data);
 
-        // ✅ correct path based on your JSON
         setCategories(data?.subcategory?.item_categories || []);
       })
       .catch((err) => console.log(err));
@@ -21,9 +21,7 @@ const FerritesMagnets = () => {
   return (
     <div className="container mt-4">
       {/* Title */}
-      <h3 className="mb-4">
-        Ferrites/Magnets
-      </h3>
+      <h3 className="mb-4">Ferrites/Magnets</h3>
 
       {categories.map((section, index) => (
         <div key={index} className="section-box mb-4">
@@ -33,7 +31,21 @@ const FerritesMagnets = () => {
             <h5 className="section-title">
               {section.name} ({section.product_count})
             </h5>
-            <span className="arrow">→</span>
+
+            {/* ✅ ARROW CLICK FIX */}
+            <span
+              className="arrow"
+              style={{ cursor: "pointer", fontSize: "18px", fontWeight: "bold" }}
+              onClick={() => {
+                if (section?.slug) {
+                  navigate(`/category/${section.slug}`);
+                } else {
+                  console.log("Slug missing:", section);
+                }
+              }}
+            >
+              →
+            </span>
           </div>
 
           {/* Cards */}
@@ -43,15 +55,15 @@ const FerritesMagnets = () => {
                 <div className="card custom-card text-center p-3">
 
                   {/* Image */}
-                 <img
-  src={
-    item.file_name
-      ? `http://sourceindia-electronics.com/${item.file_name}`
-      : "http://sourceindia-electronics.com/default.png"
-  }
-  alt={item.name}
-  className="card-img mb-2"
-/>
+                  <img
+                    src={
+                      item.file_name
+                        ? `http://sourceindia-electronics.com/${item.file_name}`
+                        : "http://sourceindia-electronics.com/default.png"
+                    }
+                    alt={item.name}
+                    className="card-img mb-2"
+                  />
 
                   {/* Title */}
                   <a href="#" className="card-title">

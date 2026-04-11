@@ -14,6 +14,9 @@ import Subcategory from "./Pages/Subcategory";
 // Components
 import Hardware from "./Components/Hardware";
 import Industries from "./Components/Industries";
+import Productdetail from "./Components/Productdetail";
+import Productdetail2 from "./Components/Productdetail2";
+
 
 function App() {
   console.log("App loaded successfully");
@@ -25,7 +28,7 @@ function App() {
       <Routes>
         {console.log("Routes rendered")}
 
-        <Route path="/" element={<Home />} />
+        <Route path="/Home" element={<Home />} />
 
         <Route path="/category" element={<Category />} />
         <Route path="/category/:name" element={<CategoryDetails />} />
@@ -40,6 +43,9 @@ function App() {
         <Route path="/companies/:id" element={<h1>Company Details Page</h1>} />
 
         <Route path="*" element={<h1>404 Page Not Found</h1>} />
+        <Route path="/product/:id" element={<Productdetail />} />
+        <Route path="/product2/:id" element={<Productdetail2 />} />
+    
       </Routes>
 
       <Footer />

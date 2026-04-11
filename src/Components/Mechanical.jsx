@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Mechanical = () => {
   const [data, setData] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(
@@ -23,20 +25,40 @@ const Mechanical = () => {
       {data.map((section) => (
         <div key={section.id} className="mb-5">
 
-          {/* MAIN CATEGORY TITLE */}
+          {/* HEADER */}
           <div className="d-flex justify-content-between align-items-center mb-3">
+
             <h5>
               {section.name} ({section.product_count})
             </h5>
-            <span>→</span>
+
+            {/* 🔥 FIXED ARROW */}
+            <span
+              style={{
+                cursor: "pointer",
+                fontSize: "20px",
+                fontWeight: "bold",
+                color: "#0d6efd",
+              }}
+              onClick={() => {
+                if (section?.slug) {
+                  navigate(`/category/${section.slug}`);
+                } else {
+                  console.log("Slug missing:", section);
+                }
+              }}
+            >
+              →
+            </span>
+
           </div>
 
-          {/* IF NO ITEMS */}
-          {section.items.length === 0 ? (
+          {/* ITEMS */}
+          {section.items && section.items.length === 0 ? (
             <p className="text-muted">No items found.</p>
           ) : (
             <div className="row">
-              {section.items.map((item) => (
+              {section.items?.map((item) => (
                 <div
                   className="col-lg-2 col-md-3 col-sm-6 mb-4"
                   key={item.id}
@@ -45,26 +67,23 @@ const Mechanical = () => {
 
                     {/* IMAGE */}
                     <div style={{ height: "60px", marginBottom: "10px" }}>
-                      {item.file_name ? (
-                     <img
-  src={
-    item.file_name
-      ? `https://react-live.sourceindia-electronics.com/${item.file_name}`
-      : "https://sourceindia-electronics.com/default.png"
-  }
-  alt={item.name}
-  style={{
-    width: "60px",
-    height: "60px",
-    objectFit: "contain",
-  }}
-  onError={(e) => {
-    e.target.src = "https://sourceindia-electronics.com/default.png";
-  }}
-/>
-                      ) : (
-                        <div>SI</div>
-                      )}
+                      <img
+                        src={
+                          item.file_name
+                            ? `https://react-live.sourceindia-electronics.com/${item.file_name}`
+                            : "https://sourceindia-electronics.com/default.png"
+                        }
+                        alt={item.name}
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          objectFit: "contain",
+                        }}
+                        onError={(e) => {
+                          e.target.src =
+                            "https://sourceindia-electronics.com/default.png";
+                        }}
+                      />
                     </div>
 
                     {/* NAME */}
@@ -82,6 +101,7 @@ const Mechanical = () => {
               ))}
             </div>
           )}
+
         </div>
       ))}
     </div>

@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // ✅ ADD
 
-const IMAGE_BASE_URL =
-  "https://react-live.sourceindia-electronics.com/";
+const IMAGE_BASE_URL = "https://react-live.sourceindia-electronics.com/";
 
-const StateFolder = () => {
-
-  const navigate = useNavigate(); // ✅ ADD
-
+const Potential = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [states, setStates] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -22,19 +18,10 @@ const StateFolder = () => {
     itemCategory: "",
   });
 
-  const [searchText, setSearchText] = useState("");
-  const [categorySearch, setCategorySearch] = useState("");
-  const [subCategorySearch, setSubCategorySearch] = useState("");
-  const [itemCategorySearch, setItemCategorySearch] = useState("");
-  const [companySearch, setCompanySearch] = useState("");
-
-  const [selectedStates, setSelectedStates] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
-  const [selectedItemCategories, setSelectedItemCategories] = useState([]);
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
-
   const [loading, setLoading] = useState(true);
+
+  // Product search term
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchProducts();
@@ -43,15 +30,16 @@ const StateFolder = () => {
     fetchCompanies();
   }, []);
 
-  // ================= PRODUCTS =================
+  // Fetch Products
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=15&page=1&category=1&sub_category=9&item_category_id=17"
+        "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=15&page=1&category=1&sub_category=51&item_category_id=187"
       );
 
       const data = res.data.products || [];
       setProducts(data);
+      setFilteredProducts(data); // Initially show all products
 
       if (data.length > 0) {
         setTopInfo({
@@ -61,21 +49,20 @@ const StateFolder = () => {
         });
       }
 
+      // States
       const uniqueStates = [];
       const seenStates = new Set();
-
       data.forEach((item) => {
         if (item.state_name && !seenStates.has(item.state_name)) {
           seenStates.add(item.state_name);
           uniqueStates.push({ name: item.state_name });
         }
       });
-
       setStates(uniqueStates);
 
+      // Item Categories
       const uniqueItem = [];
       const seenItem = new Set();
-
       data.forEach((item) => {
         if (item.item_category_name && !seenItem.has(item.item_category_name)) {
           seenItem.add(item.item_category_name);
@@ -85,7 +72,6 @@ const StateFolder = () => {
           });
         }
       });
-
       setItemCategories(uniqueItem);
 
     } catch (err) {
@@ -95,7 +81,18 @@ const StateFolder = () => {
     }
   };
 
-  // ================= CATEGORY =================
+  // Filter products on search
+  const handleSearch = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+
+    const filtered = products.filter((p) =>
+      p.title.toLowerCase().includes(term.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  };
+
+  // Fetch Categories
   const fetchCategories = async () => {
     try {
       const res = await axios.get(
@@ -107,60 +104,44 @@ const StateFolder = () => {
     }
   };
 
-  // ================= SUBCATEGORY =================
+  // Fetch Subcategories
   const fetchSubCategories = async () => {
     try {
       const res = await axios.get(
         "https://react-live.sourceindia-electronics.com/v1/api/item_category/by-selected-category-subcategory"
       );
-
       const data = res.data || [];
-
       const unique = [];
       const seen = new Set();
-
       data.forEach((item) => {
         if (item.subcategory_name && !seen.has(item.subcategory_name)) {
           seen.add(item.subcategory_name);
-          unique.push({
-            id: item.subcategory_id,
-            name: item.subcategory_name,
-          });
+          unique.push({ id: item.subcategory_id, name: item.subcategory_name });
         }
       });
-
       setSubCategories(unique);
     } catch (err) {
       console.log(err);
     }
   };
 
-  // ================= COMPANY =================
+  // Fetch Companies
   const fetchCompanies = async () => {
     try {
       const res = await axios.get(
         "https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0"
       );
-
       const data = res.data.data || res.data.companies || [];
-
       const unique = [];
       const seen = new Set();
-
       data.forEach((item) => {
         const name = item.organization_name;
-
         if (name && !seen.has(name)) {
           seen.add(name);
-          unique.push({
-            id: item.id,
-            name: name,
-          });
+          unique.push({ id: item.id, name });
         }
       });
-
       setCompanies(unique);
-
     } catch (err) {
       console.log(err);
     }
@@ -169,14 +150,17 @@ const StateFolder = () => {
   return (
     <div className="container-fluid mt-3">
       <div className="row">
-
-        {/* SIDEBAR */}
+        {/* Sidebar */}
         <div className="col-md-3">
-
           <h6>Search Products</h6>
-          <input className="form-control" />
+          <input
+            type="text"
+            className="form-control mb-3"
+            placeholder="Search Products..."
+            value={searchTerm}
+            onChange={handleSearch}
+          />
 
-          {/* STATES */}
           <h5 className="mt-3">States</h5>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
             {states.map((s, i) => (
@@ -187,7 +171,6 @@ const StateFolder = () => {
             ))}
           </div>
 
-          {/* CATEGORY */}
           <h5 className="mt-3">Categories</h5>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
             {categories.map((c) => (
@@ -198,7 +181,6 @@ const StateFolder = () => {
             ))}
           </div>
 
-          {/* SUBCATEGORY */}
           <h5 className="mt-3">Sub Categories</h5>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
             {subCategories.map((s) => (
@@ -209,7 +191,6 @@ const StateFolder = () => {
             ))}
           </div>
 
-          {/* ITEM CATEGORY */}
           <h5 className="mt-3">Item Categories</h5>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
             {itemCategories.map((s) => (
@@ -220,7 +201,6 @@ const StateFolder = () => {
             ))}
           </div>
 
-          {/* COMPANY */}
           <h5 className="mt-3">Companies</h5>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
             {companies.map((c) => (
@@ -230,58 +210,46 @@ const StateFolder = () => {
               </div>
             ))}
           </div>
-
         </div>
 
-        {/* PRODUCTS */}
+        {/* Products */}
         <div className="col-md-9">
-
-          {/* TOP BAR */}
+          {/* Top Bar */}
           <div className="mb-3 p-3 bg-light border rounded">
             <h5>
               {topInfo.category} {" > "} {topInfo.subcategory}
             </h5>
-            <p className="mb-0 text-muted">
-              {topInfo.itemCategory}
-            </p>
+            <p className="mb-0 text-muted">{topInfo.itemCategory}</p>
           </div>
 
           <div className="row">
-            {products.map((p) => (
+            {filteredProducts.map((p) => (
               <div className="col-md-4 mb-3" key={p.id}>
                 <div className="card product-card">
-
                   <img
                     src={`${IMAGE_BASE_URL}v1/${p.file_name}`}
                     className="product-img"
+                    alt=""
                   />
-
                   <div className="card-body">
                     <h6>{p.title}</h6>
                     <p>{p.company_name}</p>
                     <p>{p.state_name}</p>
                   </div>
-
-                  {/* ✅ FINAL VIEW BUTTON FIX */}
                   <div className="card-footer text-center">
-                    <button
-                      className="btn view-btn"
-                      onClick={() => navigate(`/product/${p.id}`)}
-                    >
-                      View
-                    </button>
+                    <button className="btn view-btn">View</button>
                   </div>
-
                 </div>
               </div>
             ))}
+            {filteredProducts.length === 0 && (
+              <div className="text-muted">No products found</div>
+            )}
           </div>
-
         </div>
-
       </div>
     </div>
   );
 };
 
-export default StateFolder;
+export default Potential;

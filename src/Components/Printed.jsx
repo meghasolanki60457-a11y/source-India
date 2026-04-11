@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // ✅ ADD
 
-const IMAGE_BASE_URL =
-  "https://react-live.sourceindia-electronics.com/";
+const IMAGE_BASE_URL = "https://react-live.sourceindia-electronics.com/";
 
-const StateFolder = () => {
-
-  const navigate = useNavigate(); // ✅ ADD
-
+const Printed = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+
   const [states, setStates] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -22,19 +19,7 @@ const StateFolder = () => {
     itemCategory: "",
   });
 
-  const [searchText, setSearchText] = useState("");
-  const [categorySearch, setCategorySearch] = useState("");
-  const [subCategorySearch, setSubCategorySearch] = useState("");
-  const [itemCategorySearch, setItemCategorySearch] = useState("");
-  const [companySearch, setCompanySearch] = useState("");
-
-  const [selectedStates, setSelectedStates] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
-  const [selectedItemCategories, setSelectedItemCategories] = useState([]);
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
-
-  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchProducts();
@@ -43,16 +28,19 @@ const StateFolder = () => {
     fetchCompanies();
   }, []);
 
-  // ================= PRODUCTS =================
+  // ================= PRODUCTS + TOPBAR API (UPDATED) =================
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=15&page=1&category=1&sub_category=9&item_category_id=17"
+        "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=15&page=1&category=1&sub_category=52&item_category_id=198"
       );
 
       const data = res.data.products || [];
-      setProducts(data);
 
+      setProducts(data);
+      setFilteredProducts(data);
+
+      // ================= TOP BAR =================
       if (data.length > 0) {
         setTopInfo({
           category: data[0].category_name || "",
@@ -61,6 +49,7 @@ const StateFolder = () => {
         });
       }
 
+      // ================= STATES =================
       const uniqueStates = [];
       const seenStates = new Set();
 
@@ -73,6 +62,7 @@ const StateFolder = () => {
 
       setStates(uniqueStates);
 
+      // ================= ITEM CATEGORIES =================
       const uniqueItem = [];
       const seenItem = new Set();
 
@@ -90,24 +80,31 @@ const StateFolder = () => {
 
     } catch (err) {
       console.log(err);
-    } finally {
-      setLoading(false);
     }
   };
 
-  // ================= CATEGORY =================
+  // ================= SEARCH =================
+  const handleSearch = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+
+    const filtered = products.filter((p) =>
+      p.title?.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setFilteredProducts(filtered);
+  };
+
+  // ================= STATIC APIs (SAME) =================
   const fetchCategories = async () => {
     try {
       const res = await axios.get(
         "https://react-live.sourceindia-electronics.com/v1/api/categories?is_delete=0"
       );
       setCategories(res.data || []);
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   };
 
-  // ================= SUBCATEGORY =================
   const fetchSubCategories = async () => {
     try {
       const res = await axios.get(
@@ -115,7 +112,6 @@ const StateFolder = () => {
       );
 
       const data = res.data || [];
-
       const unique = [];
       const seen = new Set();
 
@@ -130,12 +126,9 @@ const StateFolder = () => {
       });
 
       setSubCategories(unique);
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   };
 
-  // ================= COMPANY =================
   const fetchCompanies = async () => {
     try {
       const res = await axios.get(
@@ -143,97 +136,85 @@ const StateFolder = () => {
       );
 
       const data = res.data.data || res.data.companies || [];
-
       const unique = [];
       const seen = new Set();
 
       data.forEach((item) => {
         const name = item.organization_name;
-
         if (name && !seen.has(name)) {
           seen.add(name);
-          unique.push({
-            id: item.id,
-            name: name,
-          });
+          unique.push({ id: item.id, name });
         }
       });
 
       setCompanies(unique);
-
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   };
 
   return (
     <div className="container-fluid mt-3">
       <div className="row">
 
-        {/* SIDEBAR */}
+        {/* ================= SIDEBAR ================= */}
         <div className="col-md-3">
 
           <h6>Search Products</h6>
-          <input className="form-control" />
+          <input
+            type="text"
+            className="form-control mb-3"
+            placeholder="Search by product name..."
+            value={searchTerm}
+            onChange={handleSearch}
+          />
 
-          {/* STATES */}
-          <h5 className="mt-3">States</h5>
-          <div style={{ maxHeight: 150, overflowY: "auto" }}>
+          <h5>States</h5>
+          <div>
             {states.map((s, i) => (
               <div key={i}>
-                <input type="checkbox" />
-                <span className="ms-2">{s.name}</span>
+                <input type="checkbox" /> {s.name}
               </div>
             ))}
           </div>
 
-          {/* CATEGORY */}
-          <h5 className="mt-3">Categories</h5>
-          <div style={{ maxHeight: 150, overflowY: "auto" }}>
+          <h5>Categories</h5>
+          <div>
             {categories.map((c) => (
               <div key={c.id}>
-                <input type="checkbox" />
-                <span className="ms-2">{c.name}</span>
+                <input type="checkbox" /> {c.name}
               </div>
             ))}
           </div>
 
-          {/* SUBCATEGORY */}
-          <h5 className="mt-3">Sub Categories</h5>
-          <div style={{ maxHeight: 150, overflowY: "auto" }}>
+          <h5>Sub Categories</h5>
+          <div>
             {subCategories.map((s) => (
               <div key={s.id}>
-                <input type="checkbox" />
-                <span className="ms-2">{s.name}</span>
+                <input type="checkbox" /> {s.name}
               </div>
             ))}
           </div>
 
-          {/* ITEM CATEGORY */}
-          <h5 className="mt-3">Item Categories</h5>
-          <div style={{ maxHeight: 150, overflowY: "auto" }}>
+          <h5>Item Categories</h5>
+          <div>
             {itemCategories.map((s) => (
               <div key={s.id}>
-                <input type="checkbox" />
-                <span className="ms-2">{s.name}</span>
+                <input type="checkbox" /> {s.name}
               </div>
             ))}
           </div>
 
-          {/* COMPANY */}
-          <h5 className="mt-3">Companies</h5>
-          <div style={{ maxHeight: 150, overflowY: "auto" }}>
+          <h5>Companies</h5>
+          <div>
             {companies.map((c) => (
               <div key={c.id}>
-                <input type="checkbox" />
-                <span className="ms-2">{c.name}</span>
+                <input type="checkbox" /> {c.name}
               </div>
             ))}
           </div>
 
         </div>
 
-        {/* PRODUCTS */}
+        {/* ================= PRODUCTS ================= */}
         <div className="col-md-9">
 
           {/* TOP BAR */}
@@ -246,14 +227,16 @@ const StateFolder = () => {
             </p>
           </div>
 
+          {/* PRODUCTS */}
           <div className="row">
-            {products.map((p) => (
+            {filteredProducts.map((p) => (
               <div className="col-md-4 mb-3" key={p.id}>
-                <div className="card product-card">
+                <div className="card">
 
                   <img
                     src={`${IMAGE_BASE_URL}v1/${p.file_name}`}
-                    className="product-img"
+                    alt={p.title}
+                    style={{ width: "100%" }}
                   />
 
                   <div className="card-body">
@@ -262,19 +245,15 @@ const StateFolder = () => {
                     <p>{p.state_name}</p>
                   </div>
 
-                  {/* ✅ FINAL VIEW BUTTON FIX */}
-                  <div className="card-footer text-center">
-                    <button
-                      className="btn view-btn"
-                      onClick={() => navigate(`/product/${p.id}`)}
-                    >
-                      View
-                    </button>
-                  </div>
-
                 </div>
               </div>
             ))}
+
+            {filteredProducts.length === 0 && (
+              <div className="col-12 text-center">
+                No products found
+              </div>
+            )}
           </div>
 
         </div>
@@ -284,4 +263,4 @@ const StateFolder = () => {
   );
 };
 
-export default StateFolder;
+export default Printed;

@@ -508,5 +508,147 @@ p {
 .product-card:hover {
   box-shadow: 0 6px 15px rgba(0,0,0,0.1);
 }
+.view-btn {
+  background-color: #ff6a00;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  padding: 6px 18px;
+  border-radius: 4px;
+  width: auto;        /* ❌ full width hata diya */
+  display: inline-block;
+}
+
+.view-btn:hover {
+  background-color: #e65c00;
+}
+.product-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden; /* 🔥 overlap fix */
+}
+
+.product-img {
+  height: 140px;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.card-body {
+  flex-grow: 1; /* 🔥 text space control */
+}
+
+.card-footer {
+  background: transparent;
+  border-top: none;
+}
+
+.view-btn {
+  background-color: #ff6a00;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  padding: 6px 18px;
+  border-radius: 4px;
+}
+
+.view-btn:hover {
+  background-color: #e65c00;
+}
+/* end */
+
+/* productdetail */
+
+.product-page {
+  background: #f5f6f8;
+}
+
+.product-img {
+  width: 120px;
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+.title {
+  color: #ff6a00;
+  font-weight: 600;
+}
+
+.enquiry-btn {
+  background: #ff6a00;
+  color: white;
+  border: none;
+}
+
+.company-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+}
+
+.rec-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+
+.sim-img {
+  height: 70px;
+  background: #eee;
+}
+
+.view-btn {
+  border: 1px solid #0d6efd;
+  color: #0d6efd;
+}
+
+.company-btn {
+  border: 1px solid #0d6efd;
+  background: white;
+  color: #0d6efd;
+}
+
+.rec-box {
+  border: 1px solid #eee;
+  border-radius: 6px;
+}
+
+.rec-btn {
+  background: #ff6a00;
+  color: white;
+  border: none;
+}
+.product-img {
+  width: 120px;
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+.sim-img {
+  height: 70px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.view-btn {
+  border: 1px solid #0d6efd;
+  color: #0d6efd;
+  background: #fff;
+}
+
+.enquiry-btn {
+  background: #ff6a00;
+  color: #fff;
+  border: none;
+}
+
+.company-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+}
+
 
 /* end */
