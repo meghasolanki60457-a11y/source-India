@@ -28,7 +28,7 @@ function App() {
       <Routes>
         {console.log("Routes rendered")}
 
-        <Route path="/Home" element={<Home />} />
+        <Route path="/" element={<Home />} />
 
         <Route path="/category" element={<Category />} />
         <Route path="/category/:name" element={<CategoryDetails />} />

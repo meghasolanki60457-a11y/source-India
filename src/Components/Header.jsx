@@ -89,7 +89,7 @@ function Header() {
               {/* HOME */}
               <li className="nav-item">
                 <NavLink
-                  to="/Home"
+                  to="/"
                   className={({ isActive }) =>
                     isActive ? "nav-link active" : "nav-link"
                   }
