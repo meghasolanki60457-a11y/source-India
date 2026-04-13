@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
-const Productdetail = () => {
-  const { id } = useParams();
+const Product2 = () => {
+  const { id } = useParams(); // (id रहेगा but use नहीं होगा)
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
@@ -13,39 +13,23 @@ const Productdetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ✅ API 1
-        const res1 = await axios.get(
-          `https://react-live.sourceindia-electronics.com/v1/api/products/${id}`
+        // ✅ DIRECT DETAILS API (UPDATED)
+        const res = await axios.get(
+          "https://react-live.sourceindia-electronics.com/v1/api/products/details/telematics-control-unit-tcu-2g"
         );
 
-        const basicData = res1.data.data || res1.data;
+        const data = res.data.data || res.data;
 
-        // ✅ slug
-        const slug = basicData.slug;
+        console.log("FINAL DATA:", data);
 
-        // ✅ API 2 (IMPORTANT for recommended_companies)
-        const res2 = await axios.get(
-          `https://react-live.sourceindia-electronics.com/v1/api/products/details/${slug}`
-        );
-
-        const fullData = res2.data.data || res2.data;
-
-        // ✅ MERGE DATA
-        const finalData = {
-          ...basicData,
-          ...fullData,
-        };
-
-        console.log("FINAL DATA:", finalData); // debug
-
-        setProduct(finalData);
+        setProduct(data);
       } catch (err) {
         console.log(err);
       }
     };
 
     fetchData();
-  }, [id]);
+  }, []);
 
   if (!product) {
     return <div className="p-5 text-center">Loading...</div>;
@@ -90,53 +74,52 @@ const Productdetail = () => {
             </div>
 
             {/* ✅ RECOMMENDED PRODUCTS */}
-          {/* ✅ RECOMMENDED PRODUCTS (FIXED UI) */}
-<div className="mt-3">
-  <h6>Recommended Products</h6>
+            <div className="mt-3">
+              <h6>Recommended Products</h6>
 
-  <div className="row g-3">
-    {product.similar_products?.map((item) => (
-      <div className="col-md-3 col-6" key={item.id}>
+              <div className="row g-3">
+                {product.similar_products?.map((item) => (
+                  <div className="col-md-3 col-6" key={item.id}>
 
-        <div
-          className="card p-3 text-center h-100 shadow-sm"
-          style={{ minHeight: "220px" }}
-        >
+                    <div
+                      className="card p-3 text-center h-100 shadow-sm"
+                      style={{ minHeight: "220px" }}
+                    >
 
-          {/* IMAGE */}
-          <div style={{ height: "120px" }}>
-            <img
-              src={imgBase + item.file_name}
-              alt=""
-              style={{
-                maxHeight: "100%",
-                maxWidth: "100%",
-                objectFit: "contain",
-              }}
-            />
-          </div>
+                      {/* IMAGE */}
+                      <div style={{ height: "120px" }}>
+                        <img
+                          src={imgBase + item.file_name}
+                          alt=""
+                          style={{
+                            maxHeight: "100%",
+                            maxWidth: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      </div>
 
-          {/* TITLE */}
-          <p className="fw-semibold small mt-2 mb-2">
-            {item.title}
-          </p>
+                      {/* TITLE */}
+                      <p className="fw-semibold small mt-2 mb-2">
+                        {item.title}
+                      </p>
 
-          {/* BUTTON */}
-          <button
-            className="btn btn-primary btn-sm mt-auto"
-            onClick={() => navigate(`/product/${item.id}`)}
-          >
-            View →
-          </button>
+                      {/* BUTTON */}
+                      <button
+                        className="btn btn-primary btn-sm mt-auto"
+                        onClick={() => navigate(`/product/${item.id}`)}
+                      >
+                        View →
+                      </button>
 
-        </div>
+                    </div>
 
-      </div>
-    ))}
-  </div>
-</div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-            {/* 🔥 RECOMMENDED COMPANIES (FINAL FIX) */}
+            {/* 🔥 RECOMMENDED COMPANIES */}
             <div className="mt-4">
               <h5 className="fw-bold mb-3">Recommended Companies</h5>
 
@@ -146,7 +129,6 @@ const Productdetail = () => {
 
                     <div className="card text-center p-3 h-100 shadow-sm">
 
-                      {/* LOGO */}
                       <img
                         src={
                           company.company_logo_file
@@ -161,7 +143,6 @@ const Productdetail = () => {
                         }}
                       />
 
-                      {/* NAME */}
                       <p className="fw-semibold small">
                         {company.organization_name || "No Company"}
                       </p>
@@ -204,4 +185,4 @@ const Productdetail = () => {
   );
 };
 
-export default Productdetail;
+export default Product2;

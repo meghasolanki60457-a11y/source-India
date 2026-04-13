@@ -26,7 +26,9 @@
   color: #ff6a00;
 }
 .hero {
-  height: 100vh;
+
+  min-height: 100vh; /* 🔥 height ki jagah min-height use karo */
+
   width: 100%;
   background-image: url("/second.png"); /* your edited image */
   background-size: cover;
@@ -166,11 +168,7 @@
   display: block;
 }
 /* Container padding */
-.container {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 0 15px;
-}
+
 
 /* Big card (left side) */
 .big-card {
@@ -652,3 +650,323 @@ p {
 
 
 /* end */
+
+/* company */
+/* Topbar */
+.topbar {
+  background: #f8f9fa;
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.topbar-search {
+  width: 50%;
+}
+
+/* Sidebar */
+.filter-box {
+  background: #fff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* Sort Bar */
+.sort-bar {
+  background: #0d6efd;
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Card */
+.company-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.company-title {
+  font-weight: 600;
+}
+
+/* Tags */
+.tag {
+  background: #ff7a00;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  margin: 2px;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+/* Fix footer */
+.company-card .card-footer {
+  margin-top: auto;
+  border-top: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .topbar-search {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+
+/* end */
+/* amphenol */
+
+.breadcrumb-text {
+  font-size: 14px;
+  color: #777;
+}
+
+.breadcrumb-text .active {
+  color: #007bff;
+}
+
+.company-card {
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+
+.company-title {
+  color: #ff6600;
+  font-weight: 600;
+}
+
+.link {
+  color: #007bff;
+}
+
+.enquiry-btn {
+  background-color: #ff6600;
+  color: #fff;
+  border: none;
+}
+
+.enquiry-btn:hover {
+  background-color: #e65c00;
+}
+
+.product-card {
+  border-radius: 10px;
+  border: 1px solid #eee;
+  transition: 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-img {
+  height: 60px;
+  background: #f5f5f5;
+  border-radius: 5px;
+}
+
+.stars {
+  color: #ccc;
+  font-size: 20px;
+}
+
+.register-btn {
+  background-color: #ff6600;
+  color: #fff;
+  border: none;
+}
+body {
+  background: #f5f6f8;
+  font-family: Arial, sans-serif;
+}
+
+/* Breadcrumb */
+.breadcrumb-text {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 15px;
+}
+
+.breadcrumb-text span {
+  color: #007bff;
+}
+
+/* MAIN CARD */
+.company-card {
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background: #fff;
+  padding: 24px;
+}
+
+/* TITLE */
+.title {
+  color: #ff6600;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.location {
+  font-size: 14px;
+  color: #777;
+}
+
+/* LABELS */
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.blue {
+  color: #007bff;
+}
+
+/* DESCRIPTION */
+.desc {
+  font-size: 13px;
+  color: #666;
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+/* ENQUIRY BUTTON */
+.enquiry-btn {
+  background: #ff6600;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.enquiry-btn:hover {
+  background: #e65c00;
+}
+
+/* RIGHT CARD */
+.stars {
+  color: #ccc;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* REGISTER BUTTON */
+.register-btn {
+  background: #ff6600;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+.register-btn:hover {
+  background: #e65c00;
+}
+
+/* PRODUCT CARD */
+.product-card {
+  border-radius: 10px;
+  border: 1px solid #eee;
+  transition: 0.3s;
+  background: #fff;
+  text-align: center;
+  padding: 15px;
+  height: 100%;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+}
+
+.img-box {
+  height: 60px;
+  width: 100%;
+  background: #f2f2f2;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+/* PRODUCT BUTTON */
+.product-card .btn {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+/* LOGO */
+.logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+/* CARD SPACING FIX */
+
+
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+}
+.footer-section {
+  margin-top: auto;
+}
+
+/* source */
+.login-wrapper {
+  height: 100vh;
+  background-color: #f5f6f8;
+}
+
+.login-card {
+  width: 380px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.login-card h3 {
+  font-weight: bold;
+}
+
+/* end */
+/* enquiry */
+
+.enquiry-header {
+  background: #0d6efd;
+  color: white;
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.enquiry-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.enquiry-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.filter-bar input {
+  border-radius: 6px;
+}
