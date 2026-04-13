@@ -10,7 +10,7 @@ const Footer = () => {
           {/* Left Logo */}
           <div className="col-md-3 mb-4">
             <p className="fw-bold">Developed and Managed by</p>
-            <img src="/public/fourteen.png" alt="elcina" className="img-fluid" />
+            <img src="/fourteen.png" alt="elcina" className="img-fluid" />
           </div>
 
           {/* About */}
@@ -30,8 +30,8 @@ const Footer = () => {
           <div className="col-md-4 mb-4">
             <h6 className="fw-bold">Supporting Associations</h6>
             <div className="d-flex gap-3">
-              <img src="/public/fifteen.png" alt="mait" height="50" />
-              <img src="/public/sixteen.png" alt="cimei" height="50" />
+              <img src="/fifteen.png" alt="mait" height="50" />
+              <img src="/sixteen.png" alt="cimei" height="50" />
             </div>
           </div>
         </div>
