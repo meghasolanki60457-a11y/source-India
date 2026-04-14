@@ -970,3 +970,75 @@ html, body, #root {
 .filter-bar input {
   border-radius: 6px;
 }
+
+.topbar {
+  background: #0d47a1;
+  color: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.filter-box {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.filter-title {
+  background: #0d47a1;
+  color: #fff;
+  padding: 10px;
+  font-weight: 600;
+}
+
+.filter-body {
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.product-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  transition: 0.3s;
+  background: #fff;
+}
+
+.product-card:hover {
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+}
+
+.product-img {
+  height: 160px;
+  width: 100%;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.view-btn {
+  background: #ff6a00;
+  color: #fff;
+  border: none;
+  width: 100%;
+  padding: 8px;
+}
+
+.view-btn:hover {
+  background: #e55d00;
+}
+
+.view-btn {
+  background: #ff6a00;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 13px;
+  display: inline-block;
+  width: auto;   /* IMPORTANT FIX */
+}
+
+.product-footer {
+  text-align: center; /* button center me aayega */
+}

@@ -101,7 +101,7 @@ function Header() {
               {/* CATEGORIES */}
               <li className="nav-item">
                 <NavLink
-                  to="/category"
+                  to="/Product-Category"
                   className={({ isActive }) =>
                     isActive ? "nav-link active" : "nav-link"
                   }

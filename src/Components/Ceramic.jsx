@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 const IMAGE_BASE_URL =
   "https://react-live.sourceindia-electronics.com/";
 
-const StateFolder = () => {
+const ceramic = () => {
+
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -21,6 +22,18 @@ const StateFolder = () => {
     itemCategory: "",
   });
 
+  const [searchText, setSearchText] = useState("");
+  const [categorySearch, setCategorySearch] = useState("");
+  const [subCategorySearch, setSubCategorySearch] = useState("");
+  const [itemCategorySearch, setItemCategorySearch] = useState("");
+  const [companySearch, setCompanySearch] = useState("");
+
+  const [selectedStates, setSelectedStates] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
+  const [selectedItemCategories, setSelectedItemCategories] = useState([]);
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,11 +43,11 @@ const StateFolder = () => {
     fetchCompanies();
   }, []);
 
-  // ================= PRODUCTS (ONLY API CHANGED) =================
+  // ================= PRODUCTS =================
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=15&page=1"
+        "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=15&page=1&category=1&sub_category=9&item_category_id=34"
       );
 
       const data = res.data.products || [];
@@ -157,7 +170,7 @@ const StateFolder = () => {
     <div className="container-fluid mt-3">
       <div className="row">
 
-        {/* SIDEBAR (UNCHANGED) */}
+        {/* SIDEBAR */}
         <div className="col-md-3">
 
           <h6>Search Products</h6>
@@ -244,12 +257,12 @@ const StateFolder = () => {
                   </div>
 
                   <div className="card-footer text-center">
-                   <button
-  className="btn view-btn"
-onClick={() => navigate(`/product/${p.slug}`)}
->
-  View
-</button>
+                    <button
+                      className="btn view-btn"
+                      onClick={() => navigate(`/product/${p.id}`)}
+                    >
+                      View
+                    </button>
                   </div>
 
                 </div>
@@ -264,4 +277,4 @@ onClick={() => navigate(`/product/${p.slug}`)}
   );
 };
 
-export default StateFolder;
+export default ceramic;

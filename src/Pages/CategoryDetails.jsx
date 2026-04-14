@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 
 import Automotivesection from "../Components/Automotivesection";
+import Ceramic from "../Components/Ceramic";
 import Mechanical from "../Components/Mechanical";
 import Magnet from "../Components/Magnet";
 import Divide from "../Components/Divide";
@@ -22,6 +23,8 @@ import Led from "../Components/Led";
 import Potential from "../Components/Potential";
 import Resistor from "../Components/Resistor";
 import Printed from "../Components/Printed";
+import Evconnector from "../Components/Evconnector";
+import Charging from "../Components/Charging";
 
 
 function CategoryDetails() {
@@ -51,6 +54,10 @@ if (name === "capacitors") return <Led />;
 if (name === "potentiometer") return <Potential />;
 if (name === "resistors") return <Resistor />;
 if (name === "printed-circuit-boards-(pcbs)") return <Printed />;
+if (name === "ceramic-components") return <Ceramic />;
+if (name === "ev-connectors") return <Evconnector />;
+if (name === "ev-charging-cable-assemblies") return <Evconnector />;
+if (name === "automotive-rubber-components") return <Charging />;
 
   return (
     <div style={{ padding: "40px" }}>

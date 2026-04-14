@@ -18,7 +18,7 @@ const Compound = () => {
 
   useEffect(() => {
     fetch(
-      "https://react-live.sourceindia-electronics.com/v1/api/categories/category-item?is_delete=0&status=1&limit=6&is_home=1"
+      "https://react-live.sourceindia-electronics.com/v1/api/categories/category-item?is_delete=0&status=1&limit=50&is_home=1"
     )
       .then((res) => res.json())
       .then((data) => {
@@ -44,6 +44,8 @@ const Compound = () => {
               image: sub.file_name
                 ? `${BASE_URL}/${sub.file_name}`
                 : "/nine.png",
+
+              // ✅ THIRD LEVEL (item_categories)
               sub_categories:
                 sub.item_categories?.map((item) => ({
                   id: item.id,
@@ -74,27 +76,32 @@ const Compound = () => {
             <div className="row gy-4">
               {category.subcategories.map((item) => (
                 <div className="col-md-6" key={item.id}>
-                  <div className="category-card d-flex justify-content-between p-3 bg-white shadow-sm">
+                  <div className="category-card p-3 bg-white shadow-sm">
 
-                    <div>
-                      <div className="d-flex justify-content-between align-items-center">
+                    {/* SUBCATEGORY HEADER */}
+                    <div className="d-flex justify-content-between align-items-center">
+                      <h5>{item.name}</h5>
 
-                        <h5>{item.name}</h5>
-
-                        {/* ✅ FIXED CLICK */}
-                        <FaArrowRight
-                          onClick={() =>
-                            navigate(
-                              `/category/${createSlug(item.name)}`,
-                              { state: { id: item.id } }
-                            )
-                          }
-                          style={{ cursor: "pointer" }}
-                        />
-                      </div>
+                      <FaArrowRight
+                        onClick={() =>
+                          navigate(
+                            `/category/${createSlug(item.name)}`,
+                            { state: { id: item.id } }
+                          )
+                        }
+                        style={{ cursor: "pointer" }}
+                      />
                     </div>
 
-                    <img src={item.image} alt="" width="80" />
+                    {/* ✅ ITEM CATEGORIES LIST */}
+                    <ul className="mt-3 ps-3">
+                      {item.sub_categories.map((sub) => (
+                        <li key={sub.id} style={{ fontSize: "14px" }}>
+                          {sub.name}
+                        </li>
+                      ))}
+                    </ul>
+
                   </div>
                 </div>
               ))}

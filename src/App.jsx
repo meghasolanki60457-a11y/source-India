@@ -17,6 +17,7 @@ import Enquiry from "./Pages/Enquiry";
 
 
 
+
 // Components
 import Hardware from "./Components/Hardware";
 import Industries from "./Components/Industries";
@@ -40,7 +41,7 @@ function App() {
 
           <Route path="/" element={<Home />} />
 
-          <Route path="/category" element={<Category />} />
+          <Route path="/Product-Category" element={<Category />} />
           <Route path="/category/:name" element={<CategoryDetails />} />
           <Route path="/Subcategory/:name" element={<Subcategory />} />
 
@@ -53,14 +54,17 @@ function App() {
           <Route path="/companies/:type" element={<Companies />} />
 
           <Route path="/amphenol" element={<Amphenol />} />
-
-          <Route path="/product/:id" element={<Productdetail />} />
+<Route path="/product/:slug" element={<Productdetail />} />
+       
           <Route path="/product2/:id" element={<Productdetail2 />} />
           <Route path="/company/:id" element={<CompanyDetail />} />
           <Route path="/applied" element={<Applied />} />
 
 <Route path="/buyer-connect/:id" element={<BuyerDetail />} />    
 <Route path="/enquiry" element={<Enquiry />} />     
+
+
+
 
           <Route path="*" element={<h1>404 Page Not Found</h1>} />
 
