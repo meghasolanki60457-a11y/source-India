@@ -7,29 +7,82 @@ const Buyer = () => {
   const [companies, setCompanies] = useState([]);
   const [itemCategories, setItemCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const [search, setSearch] = useState("");
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   const baseURL = "https://react-live.sourceindia-electronics.com/v1/";
 
-  // ================= COMPANY API =================
-  useEffect(() => {
-    setLoading(true);
+  // ================= FETCH COMPANIES (177 FIX) =================
+  const fetchCompanies = async (pageNo) => {
+    try {
+      setLoadingMore(true);
 
-    fetch(
-      "https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=12&page=1&is_seller=0&activity="
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setCompanies(data?.companies || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
+      const res = await fetch(
+        `https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=12&page=${pageNo}&is_seller=0&activity=`
+      );
+
+      const data = await res.json();
+
+      const list = Array.isArray(data?.companies)
+        ? data.companies.filter((c) => c && c.id)
+        : [];
+
+      if (pageNo === 1) {
+        setCompanies(list);
+      } else {
+        setCompanies((prev) => [...prev, ...list]);
+      }
+
+      // 🔥 IMPORTANT FIX FOR 177 TOTAL
+      if (list.length === 0 || list.length < 12) {
+        setHasMore(false);
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
+      setLoading(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // FIRST LOAD
+  useEffect(() => {
+    fetchCompanies(1);
   }, []);
 
-  // ================= CATEGORY API =================
+  // PAGE CHANGE
+  useEffect(() => {
+    if (page === 1) return;
+    fetchCompanies(page);
+  }, [page]);
+
+  // ================= INFINITE SCROLL =================
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      if (
+        scrollTop + windowHeight >= fullHeight - 200 &&
+        !loadingMore &&
+        hasMore
+      ) {
+        setPage((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadingMore, hasMore]);
+
+  // ================= ITEM CATEGORY (UNCHANGED) =================
   useEffect(() => {
     fetch(
       "https://react-live.sourceindia-electronics.com/v1/api/item_category/getitem?status=1"
@@ -53,7 +106,7 @@ const Buyer = () => {
     <div className="container-fluid mt-3">
       <div className="row">
 
-        {/* LEFT */}
+        {/* ================= SIDEBAR (NO CHANGE AT ALL) ================= */}
         <div className="col-md-3">
           <h6>Company Name</h6>
 
@@ -73,11 +126,11 @@ const Buyer = () => {
           ))}
         </div>
 
-        {/* RIGHT */}
+        {/* ================= RIGHT SIDE ================= */}
         <div className="col-md-9">
 
           {loading ? (
-            <p>Loading...</p>
+            <p>Loading companies...</p>
           ) : (
             <div className="row">
 
@@ -91,13 +144,14 @@ const Buyer = () => {
                       style={{
                         width: "120px",
                         height: "120px",
-                        objectFit: "contain"
+                        objectFit: "contain",
                       }}
                     />
 
-                    <h6 className="mt-2">{item.organization_name}</h6>
+                    <h6 className="mt-2">
+                      {item.organization_name}
+                    </h6>
 
-                    {/* LOCATION */}
                     <p>
                       <b>Location:</b>{" "}
                       {item.company_location ||
@@ -106,13 +160,15 @@ const Buyer = () => {
                         "N/A"}
                     </p>
 
-                    {/* CONNECT BUTTON */}
                     <button
-  className="btn btn-primary w-100 mt-2"
-  onClick={() => navigate(`/buyer-connect/${item.id}?type=source`)}
->
-  Connect
-</button>
+                      className="btn btn-primary w-100 mt-2"
+                      onClick={() =>
+                        navigate(`/buyer-connect/${item.id}?type=source`)
+                      }
+                    >
+                      Connect
+                    </button>
+
                   </div>
                 </div>
               ))}
@@ -120,8 +176,14 @@ const Buyer = () => {
             </div>
           )}
 
-        </div>
+          {/* LOADING MORE */}
+          {loadingMore && (
+            <p className="text-center text-primary">
+              Loading more companies...
+            </p>
+          )}
 
+        </div>
       </div>
     </div>
   );

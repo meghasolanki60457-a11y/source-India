@@ -2,64 +2,101 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const CompanyList = () => {
-
   const navigate = useNavigate();
 
   const [categories, setCategories] = useState([]);
   const [states, setStates] = useState([]);
   const [coreActivities, setCoreActivities] = useState([]);
   const [companies, setCompanies] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [search, setSearch] = useState("");
 
-  // ================= CATEGORY API =================
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const LIMIT = 50;
+
+  // ================= SIDEBAR APIs =================
   useEffect(() => {
     fetch("https://react-live.sourceindia-electronics.com/v1/api/categories?is_delete=0&status=1")
       .then(res => res.json())
-      .then(data => {
-        setCategories(Array.isArray(data) ? data : data?.data || []);
-      })
-      .catch(err => console.log(err));
+      .then(data => setCategories(Array.isArray(data) ? data : data?.data || []))
+      .catch(console.log);
   }, []);
 
-  // ================= STATES API =================
   useEffect(() => {
     fetch("https://react-live.sourceindia-electronics.com/v1/api/location/states/101")
       .then(res => res.json())
-      .then(data => {
-        setStates(Array.isArray(data) ? data : data?.data || []);
-      })
-      .catch(err => console.log(err));
+      .then(data => setStates(Array.isArray(data) ? data : data?.data || []))
+      .catch(console.log);
   }, []);
 
-  // ================= CORE ACTIVITIES API =================
   useEffect(() => {
     fetch("https://react-live.sourceindia-electronics.com/v1/api/core_activities?is_delete=0&status=1")
       .then(res => res.json())
-      .then(data => {
-        setCoreActivities(Array.isArray(data) ? data : data?.data || []);
-      })
-      .catch(err => console.log(err));
+      .then(data => setCoreActivities(Array.isArray(data) ? data : data?.data || []))
+      .catch(console.log);
   }, []);
 
   // ================= COMPANY API =================
+  const fetchCompanies = async (pageNo) => {
+    try {
+      setLoadingMore(true);
+
+      const res = await fetch(
+        `https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=${LIMIT}&page=${pageNo}&is_seller=1&activity=`
+      );
+
+      const data = await res.json();
+      const list = data?.companies || [];
+
+      if (!list.length) {
+        setHasMore(false);
+        return;
+      }
+
+      setCompanies((prev) =>
+        pageNo === 1 ? list : [...prev, ...list]
+      );
+
+      if (list.length < LIMIT) {
+        setHasMore(false);
+      }
+
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
-    setLoading(true);
+    fetchCompanies(page);
+  }, [page]);
 
-    fetch("https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=12&page=1&is_seller=1&activity=")
-      .then(res => res.json())
-      .then(data => {
+  // ================= INFINITE SCROLL =================
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
 
-        const list = data?.companies || [];
-        setCompanies(list);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.log(err);
-        setLoading(false);
-      });
-  }, []);
+      if (
+        scrollTop + windowHeight >= fullHeight - 200 &&
+        !loadingMore &&
+        hasMore
+      ) {
+        setPage(prev => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadingMore, hasMore]);
 
   // ================= FILTER =================
   const filteredCompanies = companies.filter((item) =>
@@ -75,9 +112,7 @@ const CompanyList = () => {
           <div className="filter-box">
 
             <h6>Company Name</h6>
-
             <input
-              type="text"
               className="form-control mb-3"
               placeholder="Search company..."
               value={search}
@@ -86,32 +121,29 @@ const CompanyList = () => {
 
             <h6>Category</h6>
             {categories.map((cat) => (
-              <div className="form-check" key={cat.id}>
-                <input type="checkbox" className="form-check-input" />
-                <label>{cat.name || cat.slug}</label>
+              <div key={cat.id}>
+                <input type="checkbox" /> {cat.name || cat.slug}
               </div>
             ))}
 
             <h6 className="mt-3">Core Activities</h6>
             {coreActivities.map((act) => (
-              <div className="form-check" key={act.id}>
-                <input type="checkbox" className="form-check-input" />
-                <label>{act.name || act.title}</label>
+              <div key={act.id}>
+                <input type="checkbox" /> {act.name || act.title}
               </div>
             ))}
 
             <h6 className="mt-3">State</h6>
             {states.map((st) => (
-              <div className="form-check" key={st.id}>
-                <input type="checkbox" className="form-check-input" />
-                <label>{st.name || st.state_name}</label>
+              <div key={st.id}>
+                <input type="checkbox" /> {st.name || st.state_name}
               </div>
             ))}
 
           </div>
         </div>
 
-        {/* ================= MAIN CONTENT ================= */}
+        {/* ================= MAIN ================= */}
         <div className="col-md-9">
 
           {loading ? (
@@ -121,59 +153,69 @@ const CompanyList = () => {
           ) : (
             <div className="row">
 
-              {filteredCompanies.map((item, index) => (
-                <div className="col-md-6 mb-4" key={index}>
-                  <div className="company-card">
+              {filteredCompanies.map((item) => (
+                <div className="col-md-6 mb-4" key={item.id}>
+                  <div className="border p-3 rounded">
 
                     {/* LOGO */}
-                    <div className="text-center p-2">
-                      <img
-                        src={
-                          item.company_logo_file
-                            ? `https://react-live.sourceindia-electronics.com/v1/${item.company_logo_file}`
-                            : "https://via.placeholder.com/120"
-                        }
-                        alt="company logo"
-                        style={{
-                          width: "120px",
-                          height: "120px",
-                          objectFit: "contain"
-                        }}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "https://via.placeholder.com/120";
-                        }}
-                      />
-                    </div>
+                    <img
+                      src={
+                        item.company_logo_file
+                          ? `https://react-live.sourceindia-electronics.com/v1/${item.company_logo_file}`
+                          : "https://via.placeholder.com/120"
+                      }
+                      alt=""
+                      style={{ width: 100, height: 100, objectFit: "contain" }}
+                    />
 
-                    <div className="card-body">
+                    {/* NAME */}
+                    <h6>{item.organization_name}</h6>
 
-                      <h6 className="company-title">
-                        {item.organization_name || "No Name"}
-                      </h6>
+                    {/* ================= SHORT DISPLAY ONLY (NO DATA DELETE) ================= */}
+                    <p>
+                      <b>About:</b>{" "}
+                      {item.brief_company
+                        ? item.brief_company.slice(0, 120) + "..."
+                        : "N/A"}
+                    </p>
 
-                      <p><strong>Location:</strong> {item.company_location || "N/A"}</p>
-                      <p><strong>Phone:</strong> {item.company_phone || "N/A"}</p>
-                      <p><strong>Website:</strong> {item.company_website || "N/A"}</p>
-                      <p><strong>Email:</strong> {item.company_email || "N/A"}</p>
+                    <p>
+                      <b>Location:</b>{" "}
+                      {item.company_location?.slice(0, 80) || "N/A"}
+                    </p>
 
-                    </div>
+                    <p><b>Phone:</b> {item.company_phone || "N/A"}</p>
+                    <p><b>Website:</b> {item.company_website || "N/A"}</p>
+                    <p><b>Email:</b> {item.company_email || "N/A"}</p>
+                    <p><b>Core:</b> {item.core_activity_name || "N/A"}</p>
+                    <p><b>Activity:</b> {item.activity_name || "N/A"}</p>
 
-                    {/* BUTTON FIXED */}
-                    <div className="card-footer text-center">
-                      <button
-                        className="btn btn-primary w-100"
-                     onClick={() => navigate(`/company/${item.id}`)}
-                      >
-                        View Details
-                      </button>
-                    </div>
+                    {/* BUTTON */}
+                    <button
+                      className="btn btn-primary w-100"
+                      onClick={() => navigate(`/company/${item.id}`)}
+                    >
+                      View Details
+                    </button>
 
                   </div>
                 </div>
               ))}
 
             </div>
+          )}
+
+          {/* LOADING MORE */}
+          {loadingMore && (
+            <p className="text-center text-primary">
+              Loading more companies...
+            </p>
+          )}
+
+          {!hasMore && (
+            <p className="text-center text-muted">
+              No more companies
+            </p>
           )}
 
         </div>

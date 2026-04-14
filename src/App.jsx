@@ -23,8 +23,9 @@ import Hardware from "./Components/Hardware";
 import Industries from "./Components/Industries";
 import Productdetail from "./Components/Productdetail";
 import Productdetail2 from "./Components/Productdetail2";
-import Amphenol from "./Components/Amphenol"; 
+import Amphenol from "./Components/Amphenol";
 import Applied from "./Components/Applied";
+import Seller from "./Components/Seller";
 
 
 
@@ -49,19 +50,23 @@ function App() {
           <Route path="/industries" element={<Industries />} />
 
           <Route path="/event" element={<h1>Event Page</h1>} />
-       
+
 
           <Route path="/companies/:type" element={<Companies />} />
 
           <Route path="/amphenol" element={<Amphenol />} />
-<Route path="/product/:slug" element={<Productdetail />} />
-       
+          <Route path="/product/:slug" element={<Productdetail />} />
+
           <Route path="/product2/:id" element={<Productdetail2 />} />
           <Route path="/company/:id" element={<CompanyDetail />} />
           <Route path="/applied" element={<Applied />} />
 
-<Route path="/buyer-connect/:id" element={<BuyerDetail />} />    
-<Route path="/enquiry" element={<Enquiry />} />     
+          <Route path="/buyer-connect/:id" element={<BuyerDetail />} />
+          <Route path="/enquiry" element={<Enquiry />} />
+          <Route
+            path="/company-list"
+            element={<Seller />}
+          />
 
 
 

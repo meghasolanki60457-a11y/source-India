@@ -1,29 +1,71 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 const TradingList = () => {
-
-    const navigate = useNavigate(); // ✅ FIX (bas ye line yaha aayi hai)
+    const navigate = useNavigate();
 
     const [companies, setCompanies] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
 
-    // ================= API =================
-    useEffect(() => {
-        setLoading(true);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
 
-        fetch("https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=12&page=1&is_trading=1&activity=")
-            .then(res => res.json())
-            .then(data => {
-                setCompanies(data?.companies || []);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.log(err);
-                setLoading(false);
-            });
+    const observer = useRef();
+
+    // ================= API CALL =================
+    const fetchCompanies = async (pageNo) => {
+        try {
+            setLoading(true);
+
+            const res = await fetch(
+                `https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=12&page=${pageNo}&is_trading=1&activity=`
+            );
+
+            const data = await res.json();
+
+            const newCompanies = data?.companies || [];
+
+            // append data (IMPORTANT)
+            setCompanies((prev) => [...prev, ...newCompanies]);
+
+            // stop when all data loaded
+            if (companies.length + newCompanies.length >= data?.total) {
+                setHasMore(false);
+            }
+
+            setLoading(false);
+        } catch (err) {
+            console.log(err);
+            setLoading(false);
+        }
+    };
+
+    // first load
+    useEffect(() => {
+        fetchCompanies(1);
     }, []);
+
+    // load next page
+    useEffect(() => {
+        if (page === 1) return;
+        fetchCompanies(page);
+    }, [page]);
+
+    // ================= INFINITE SCROLL =================
+    const lastCompanyRef = (node) => {
+        if (loading) return;
+
+        if (observer.current) observer.current.disconnect();
+
+        observer.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage((prev) => prev + 1);
+            }
+        });
+
+        if (node) observer.current.observe(node);
+    };
 
     // ================= FILTER =================
     const filtered = companies.filter((item) =>
@@ -42,9 +84,8 @@ const TradingList = () => {
         <div className="container-fluid mt-3">
             <div className="row">
 
-                {/* ================= SIDEBAR ================= */}
+                {/* ================= SIDEBAR (NOT DELETED) ================= */}
                 <div className="col-md-3">
-
                     <h6>Company Name</h6>
 
                     <input
@@ -53,26 +94,25 @@ const TradingList = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-
                 </div>
 
                 {/* ================= MAIN ================= */}
                 <div className="col-md-9">
 
-                    {loading ? (
-                        <p>Loading...</p>
-                    ) : filtered.length === 0 ? (
-                        <p>No companies found</p>
-                    ) : (
-                        <div className="row">
+                    <div className="row">
 
-                            {filtered.map((item, index) => (
+                        {filtered.map((item, index) => {
 
-                                <div className="col-md-6 mb-4" key={index}>
+                            const isLast = index === filtered.length - 1;
 
+                            return (
+                                <div
+                                    className="col-md-6 mb-4"
+                                    key={item.id || index}
+                                    ref={isLast ? lastCompanyRef : null}
+                                >
                                     <div className="border rounded p-3 bg-white">
 
-                                        {/* TOP SECTION */}
                                         <div className="d-flex gap-3">
 
                                             <img
@@ -101,14 +141,13 @@ const TradingList = () => {
                                                 </p>
 
                                                 <p className="mb-1">
-                                                    <b>Activity:</b> Trading / Distribution
+                                                    <b>Activity:</b>{" "}
+                                                    {item.activity_name || "Trading/Distribution"}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        {/* MIDDLE SECTION */}
                                         <div className="mt-2">
-
                                             <p className="mb-1">
                                                 <b>Core Activity:</b>{" "}
                                                 {item.core_activity_name || "Services"}
@@ -123,30 +162,8 @@ const TradingList = () => {
                                                 <b>Sub Category:</b>{" "}
                                                 {item.sub_category_name || "N/A"}
                                             </p>
-
                                         </div>
 
-                                        {/* TAGS */}
-                                        <div className="mt-2 d-flex flex-wrap gap-2">
-
-                                            {(item.item_category_name || "Electronics").split(",").map((tag, i) => (
-                                                <span
-                                                    key={i}
-                                                    style={{
-                                                        background: "orange",
-                                                        color: "#fff",
-                                                        fontSize: "12px",
-                                                        padding: "3px 8px",
-                                                        borderRadius: "4px"
-                                                    }}
-                                                >
-                                                    {tag}
-                                                </span>
-                                            ))}
-
-                                        </div>
-
-                                        {/* BUTTON */}
                                         <button
                                             className="btn btn-primary w-100 mt-3"
                                             onClick={() => navigate(`/company/${item.id}`)}
@@ -155,13 +172,14 @@ const TradingList = () => {
                                         </button>
 
                                     </div>
-
                                 </div>
+                            );
+                        })}
 
-                            ))}
+                    </div>
 
-                        </div>
-                    )}
+                    {loading && <p>Loading...</p>}
+                    {!hasMore && <p className="text-center">All companies loaded</p>}
 
                 </div>
             </div>
