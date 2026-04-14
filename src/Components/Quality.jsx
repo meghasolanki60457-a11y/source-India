@@ -6,6 +6,7 @@ const IMAGE_BASE_URL =
   "https://react-live.sourceindia-electronics.com/";
 
 const StateFolder = () => {
+
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -30,28 +31,42 @@ const StateFolder = () => {
     fetchCompanies();
   }, []);
 
-  // ================= PRODUCTS (ONLY API CHANGED) =================
+  // ================= PRODUCTS (FIXED - LOAD ALL 521) =================
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(
-        "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=15&page=1"
-      );
+      let allProducts = [];
+      let page = 1;
 
-      const data = res.data.products || [];
-      setProducts(data);
+      while (true) {
+        const res = await axios.get(
+          "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=50&page=" +
+            page
+        );
 
-      if (data.length > 0) {
+        const data = res.data.products || [];
+
+        if (data.length === 0) break;
+
+        allProducts = allProducts.concat(data);
+        page++;
+      }
+
+      setProducts(allProducts);
+
+      // TOP INFO
+      if (allProducts.length > 0) {
         setTopInfo({
-          category: data[0].category_name || "",
-          subcategory: data[0].subcategory_name || "",
-          itemCategory: data[0].item_category_name || "",
+          category: allProducts[0].category_name || "",
+          subcategory: allProducts[0].subcategory_name || "",
+          itemCategory: allProducts[0].item_category_name || "",
         });
       }
 
+      // STATES
       const uniqueStates = [];
       const seenStates = new Set();
 
-      data.forEach((item) => {
+      allProducts.forEach((item) => {
         if (item.state_name && !seenStates.has(item.state_name)) {
           seenStates.add(item.state_name);
           uniqueStates.push({ name: item.state_name });
@@ -60,10 +75,11 @@ const StateFolder = () => {
 
       setStates(uniqueStates);
 
+      // ITEM CATEGORIES
       const uniqueItem = [];
       const seenItem = new Set();
 
-      data.forEach((item) => {
+      allProducts.forEach((item) => {
         if (item.item_category_name && !seenItem.has(item.item_category_name)) {
           seenItem.add(item.item_category_name);
           uniqueItem.push({
@@ -157,7 +173,7 @@ const StateFolder = () => {
     <div className="container-fluid mt-3">
       <div className="row">
 
-        {/* SIDEBAR (UNCHANGED) */}
+        {/* SIDEBAR */}
         <div className="col-md-3">
 
           <h6>Search Products</h6>
@@ -244,12 +260,12 @@ const StateFolder = () => {
                   </div>
 
                   <div className="card-footer text-center">
-                   <button
-  className="btn view-btn"
-onClick={() => navigate(`/product/${p.slug}`)}
->
-  View
-</button>
+                    <button
+                      className="btn view-btn"
+                      onClick={() => navigate(`/product/${p.slug}`)}
+                    >
+                      View
+                    </button>
                   </div>
 
                 </div>
