@@ -10,10 +10,14 @@ const Buyer = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
+  const [loading, setLoading] = useState(false);
+
   const baseURL = "https://react-live.sourceindia-electronics.com/v1/";
 
   // ================= FETCH COMPANIES =================
   const fetchCompanies = async (pageNo = 1) => {
+    setLoading(true);
+
     const res = await fetch(
       `${baseURL}api/products/companies?is_delete=0&status=1&limit=12&page=${pageNo}&is_seller=0`
     );
@@ -26,6 +30,8 @@ const Buyer = () => {
     );
 
     if (list.length < 12) setHasMore(false);
+
+    setLoading(false);
   };
 
   // ================= FETCH CATEGORIES =================
@@ -43,7 +49,7 @@ const Buyer = () => {
     fetchCategories();
   }, []);
 
-  // ================= SCROLL (INFINITE) =================
+  // ================= 🔥 INFINITE SCROLL =================
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -52,25 +58,24 @@ const Buyer = () => {
 
       if (
         scrollTop + windowHeight >= fullHeight - 150 &&
-        hasMore
+        hasMore &&
+        !loading
       ) {
         setPage((prev) => prev + 1);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMore]);
 
-  // ================= PAGE CHANGE HANDLER =================
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loading]);
+
+  // ================= PAGE CHANGE =================
   useEffect(() => {
     if (page > 1) {
       fetchCompanies(page);
 
-      // scroll to top for next page
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 100);
+      // ❌ FIX: removed scrollToTop (THIS WAS THE BUG)
     }
   }, [page]);
 
@@ -179,6 +184,10 @@ const Buyer = () => {
             ))}
 
           </div>
+
+          {loading && (
+            <p className="text-center">Loading...</p>
+          )}
 
         </div>
 

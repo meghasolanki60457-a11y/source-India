@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 
 // Components
 import Header from "./Components/Header";
@@ -15,9 +16,6 @@ import CompanyDetail from "./Pages/CompanyDetail";
 import BuyerDetail from "./Pages/BuyerDetail";
 import Enquiry from "./Pages/Enquiry";
 
-
-
-
 // Components
 import Hardware from "./Components/Hardware";
 import Industries from "./Components/Industries";
@@ -27,58 +25,52 @@ import Amphenol from "./Components/Amphenol";
 import Applied from "./Components/Applied";
 import Seller from "./Components/Seller";
 
-
-
-// ✅ NEW IMPORT
-
 function App() {
   return (
-    <div className="app-wrapper">   {/* ✅ ADD THIS */}
+    <HelmetProvider>   {/* ✅ FIX ADDED HERE */}
 
-      <Header />
+      <div className="app-wrapper">
 
-      <main className="main-content">  {/* ✅ ADD THIS */}
-        <Routes>
+        <Header />
 
-          <Route path="/" element={<Home />} />
+        <main className="main-content">
+          <Routes>
 
-          <Route path="/Product-Category" element={<Category />} />
-          <Route path="/category/:name" element={<CategoryDetails />} />
-          <Route path="/Subcategory/:name" element={<Subcategory />} />
+            <Route path="/" element={<Home />} />
 
-          <Route path="/hardware" element={<Hardware />} />
-          <Route path="/industries" element={<Industries />} />
+            <Route path="/Product-Category" element={<Category />} />
+            <Route path="/category/:name" element={<CategoryDetails />} />
+            <Route path="/Subcategory/:name" element={<Subcategory />} />
 
-          <Route path="/event" element={<h1>Event Page</h1>} />
+            <Route path="/hardware" element={<Hardware />} />
+            <Route path="/industries" element={<Industries />} />
 
+            <Route path="/event" element={<h1>Event Page</h1>} />
 
-          <Route path="/companies/:type" element={<Companies />} />
+            <Route path="/companies/:type" element={<Companies />} />
 
-          <Route path="/amphenol" element={<Amphenol />} />
-          <Route path="/product/:slug" element={<Productdetail />} />
+            <Route path="/amphenol" element={<Amphenol />} />
+            <Route path="/product/:slug" element={<Productdetail />} />
 
-          <Route path="/product2/:id" element={<Productdetail2 />} />
-          <Route path="/company/:id" element={<CompanyDetail />} />
-          <Route path="/applied" element={<Applied />} />
+            <Route path="/product2/:id" element={<Productdetail2 />} />
+            <Route path="/company/:id" element={<CompanyDetail />} />
+            <Route path="/applied" element={<Applied />} />
 
-          <Route path="/buyer-connect/:id" element={<BuyerDetail />} />
-          <Route path="/enquiry" element={<Enquiry />} />
-          <Route
-            path="/company-list"
-            element={<Seller />}
-          />
+            <Route path="/buyer-connect/:id" element={<BuyerDetail />} />
+            <Route path="/enquiry" element={<Enquiry />} />
 
+            <Route path="/company-list" element={<Seller />} />
 
+            <Route path="*" element={<h1>404 Page Not Found</h1>} />
 
+          </Routes>
+        </main>
 
-          <Route path="*" element={<h1>404 Page Not Found</h1>} />
+        <Footer />
 
-        </Routes>
-      </main>
+      </div>
 
-      <Footer />
-
-    </div>
+    </HelmetProvider>
   );
 }
 

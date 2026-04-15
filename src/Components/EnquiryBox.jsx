@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 const EnquiryPage = () => {
   const [data, setData] = useState([]);
@@ -6,33 +6,32 @@ const EnquiryPage = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const BASE_URL = "https://react-live.sourceindia-electronics.com/v1/";
+  const loaderRef = useRef(null);
 
-  // ✅ FETCH API
+  const BASE_URL =
+    "https://react-live.sourceindia-electronics.com/v1/";
+
+  // ================= FETCH API =================
   const fetchData = async (pageNo) => {
     setLoading(true);
 
     try {
       const res = await fetch(
-        `https://react-live.sourceindia-electronics.com/v1/api/open_enquiries/front-enquiry?is_delete=0&page=${pageNo}`
+        `${BASE_URL}api/open_enquiries/front-enquiry?is_delete=0&page=${pageNo}`
       );
 
       const result = await res.json();
 
       let list = [];
 
-      if (Array.isArray(result)) {
-        list = result;
-      } else if (Array.isArray(result?.data)) {
-        list = result.data;
-      } else if (Array.isArray(result?.data?.enquiries)) {
+      if (Array.isArray(result)) list = result;
+      else if (Array.isArray(result?.data)) list = result.data;
+      else if (Array.isArray(result?.data?.enquiries))
         list = result.data.enquiries;
-      }
 
       if (list.length === 0) {
         setHasMore(false);
       } else {
-        // 🔥 IMPORTANT: APPEND ONLY (NO DELETE)
         setData((prev) => [...prev, ...list]);
       }
     } catch (err) {
@@ -42,35 +41,50 @@ const EnquiryPage = () => {
     setLoading(false);
   };
 
-  // first load + page change
+  // ================= FIRST LOAD =================
   useEffect(() => {
     fetchData(page);
   }, [page]);
 
-  // ✅ SINGLE PAGE SCROLL (window)
+  // ================= 🔥 GUARANTEED INFINITE SCROLL =================
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
 
-      if (scrollTop + windowHeight >= fullHeight - 100) {
-        if (!loading && hasMore) {
+        if (
+          target.isIntersecting &&
+          !loading &&
+          hasMore
+        ) {
           setPage((prev) => prev + 1);
         }
+      },
+      {
+        root: null,
+        rootMargin: "200px",
+        threshold: 0,
       }
+    );
+
+    const el = loaderRef.current;
+
+    if (el) observer.observe(el);
+
+    return () => {
+      if (el) observer.unobserve(el);
     };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll);
   }, [loading, hasMore]);
 
   return (
     <div className="container mt-4">
-      <h3 className="text-center mb-4">All Enquiry</h3>
+
+      <h3 className="text-center mb-4">
+        All Enquiry
+      </h3>
 
       <div className="row">
+
         {data.map((item) => {
           const img = item.company_logo
             ? BASE_URL + item.company_logo
@@ -82,21 +96,17 @@ const EnquiryPage = () => {
 
                 <img
                   src={img}
-                  alt="logo"
                   style={{
-                    width: "80px",
-                    height: "80px",
+                    width: 80,
+                    height: 80,
                     objectFit: "contain",
                     border: "1px solid #eee",
-                    borderRadius: "6px",
                   }}
                 />
 
                 <h5 className="mt-2">{item.title}</h5>
 
-                <p><b>Description:</b> {item.description}</p>
-
-                <hr />
+                <p>{item.description}</p>
 
                 <p>
                   <b>Name:</b>{" "}
@@ -104,36 +114,34 @@ const EnquiryPage = () => {
                     `${item.fname || ""} ${item.lname || ""}`}
                 </p>
 
-                <p>
-                  <b>Company:</b>{" "}
-                  {item.company || item.organization_name || "N/A"}
-                </p>
-
-                <p>
-                  <b>Date:</b>{" "}
-                  {item.created_at
-                    ? new Date(item.created_at).toLocaleString("en-IN")
-                    : "N/A"}
-                </p>
-
-                <button className="btn btn-primary w-100">
-                  Reply
-                </button>
-
               </div>
             </div>
           );
         })}
+
       </div>
 
-      {/* loader */}
+      {/* 🔥 VERY IMPORTANT TRIGGER ELEMENT */}
+      <div
+        ref={loaderRef}
+        style={{
+          height: "100px",
+          width: "100%",
+        }}
+      />
+
       {loading && (
-        <p className="text-center">Loading...</p>
+        <p className="text-center">
+          Loading...
+        </p>
       )}
 
       {!hasMore && (
-        <p className="text-center text-muted">No more data</p>
+        <p className="text-center text-muted">
+          No more data
+        </p>
       )}
+
     </div>
   );
 };

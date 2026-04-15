@@ -18,7 +18,6 @@ const CompanyList = () => {
   const [hasMore, setHasMore] = useState(true);
 
   const LIMIT = 50;
-
   const loaderRef = useRef(null);
 
   const BASE_URL = "https://react-live.sourceindia-electronics.com/v1/";
@@ -54,12 +53,12 @@ const CompanyList = () => {
       const data = await res.json();
       const list = data?.companies || [];
 
-      if (!list.length) {
+      if (list.length === 0) {
         setHasMore(false);
         return;
       }
 
-      setCompanies(prev =>
+      setCompanies((prev) =>
         pageNo === 1 ? list : [...prev, ...list]
       );
 
@@ -76,27 +75,33 @@ const CompanyList = () => {
   };
 
   useEffect(() => {
-    if (hasMore) fetchCompanies(page);
-  }, [page]);
+    if (hasMore) {
+      fetchCompanies(page);
+    }
+  }, [page, hasMore]);
 
-  // ================= 🔥 FIXED INFINITE SCROLL =================
+  // ================= 🔥 INFINITE SCROLL (STATEFOLDER STYLE) =================
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        const target = entries[0];
-
-        if (target.isIntersecting && hasMore && !loadingMore && !loading) {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !loadingMore &&
+          !loading
+        ) {
           setPage((prev) => prev + 1);
         }
       },
       {
         root: null,
-        rootMargin: "300px",
+        rootMargin: "100px",
         threshold: 0,
       }
     );
 
     const current = loaderRef.current;
+
     if (current) observer.observe(current);
 
     return () => {
@@ -105,7 +110,7 @@ const CompanyList = () => {
   }, [hasMore, loadingMore, loading]);
 
   // ================= SEARCH =================
-  const filteredCompanies = companies.filter(item =>
+  const filteredCompanies = companies.filter((item) =>
     item.organization_name?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -159,76 +164,50 @@ const CompanyList = () => {
           ) : (
             <div className="row">
 
-              {filteredCompanies.map((item) => {
+              {filteredCompanies.map((item) => (
+                <div className="col-md-6 mb-4" key={item.id}>
+                  <div className="border p-3 rounded shadow-sm bg-white h-100">
 
-                const tags = (item.products || [])
-                  .map(p => p.title?.trim())
-                  .filter(Boolean);
-
-                return (
-                  <div className="col-md-6 mb-4" key={item.id}>
-                    <div className="border p-3 rounded shadow-sm bg-white h-100">
-
-                      <div className="d-flex gap-3 align-items-center mb-2">
-                        <img
-                          src={
-                            item.company_logo_file
-                              ? `${BASE_URL}${item.company_logo_file}`
-                              : "https://via.placeholder.com/100"
-                          }
-                          alt=""
-                          style={{ width: 80, height: 80, objectFit: "contain" }}
-                        />
-                        <h5>{item.organization_name}</h5>
-                      </div>
-
-                      <p><b>Location:</b> {item.company_location || "N/A"}</p>
-
-                      <p>
-                        <b>Website:</b>{" "}
-                        {item.company_website ? (
-                          <a href={item.company_website} target="_blank" rel="noreferrer">
-                            {item.company_website}
-                          </a>
-                        ) : "N/A"}
-                      </p>
-
-                      <p><b>Core Activity:</b> {item.core_activity_name || "N/A"}</p>
-                      <p><b>Activity:</b> {item.activity_name || "N/A"}</p>
-
-                      <p><b>Category:</b> {item.category_name || item.category?.name || "N/A"}</p>
-                      <p><b>Sub Category:</b> {item.sub_category_name || "N/A"}</p>
-
-                      <div className="mb-2">
-                        {tags.slice(0, 6).map((tag, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              backgroundColor: "#ff7a00",
-                              color: "#fff",
-                              padding: "4px 8px",
-                              fontSize: "12px",
-                              borderRadius: "4px",
-                              marginRight: "5px",
-                              display: "inline-block"
-                            }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      <button
-                        className="btn btn-primary w-100"
-                        onClick={() => navigate(`/company/${item.id}`)}
-                      >
-                        View Details
-                      </button>
-
+                    <div className="d-flex gap-3 align-items-center mb-2">
+                      <img
+                        src={
+                          item.company_logo_file
+                            ? `${BASE_URL}${item.company_logo_file}`
+                            : "https://via.placeholder.com/100"
+                        }
+                        alt=""
+                        style={{ width: 80, height: 80, objectFit: "contain" }}
+                      />
+                      <h5>{item.organization_name}</h5>
                     </div>
+
+                    <p><b>Location:</b> {item.company_location || "N/A"}</p>
+
+                    <p>
+                      <b>Website:</b>{" "}
+                      {item.company_website ? (
+                        <a href={item.company_website} target="_blank" rel="noreferrer">
+                          {item.company_website}
+                        </a>
+                      ) : "N/A"}
+                    </p>
+
+                    <p><b>Core Activity:</b> {item.core_activity_name || "N/A"}</p>
+                    <p><b>Activity:</b> {item.activity_name || "N/A"}</p>
+
+                    <p><b>Category:</b> {item.category_name || "N/A"}</p>
+                    <p><b>Sub Category:</b> {item.sub_category_name || "N/A"}</p>
+
+                    <button
+                      className="btn btn-primary w-100"
+                      onClick={() => navigate(`/company/${item.id}`)}
+                    >
+                      View Details
+                    </button>
+
                   </div>
-                );
-              })}
+                </div>
+              ))}
 
             </div>
           )}
@@ -247,6 +226,7 @@ const CompanyList = () => {
           )}
 
         </div>
+
       </div>
     </div>
   );
