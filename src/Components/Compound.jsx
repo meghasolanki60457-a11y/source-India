@@ -8,12 +8,18 @@ const Compound = () => {
 
   const BASE_URL = "https://react-live.sourceindia-electronics.com/v1";
 
-  // ✅ SLUG FUNCTION
+  // slug
   const createSlug = (name) => {
     return name
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^\w-]+/g, "");
+  };
+
+  // image helper (IMPORTANT FIX)
+  const getImage = (file) => {
+    if (!file) return "/nine.png";
+    return file.startsWith("http") ? file : `${BASE_URL}/${file}`;
   };
 
   useEffect(() => {
@@ -27,25 +33,19 @@ const Compound = () => {
           : data?.data || data?.result || [];
 
         const selected = list[0];
-
         if (!selected) return;
 
         setCategory({
           id: selected.id,
           name: selected.name,
-          image: selected.file_name
-            ? `${BASE_URL}/${selected.file_name}`
-            : "/nine.png",
+          image: getImage(selected.file_name),
 
           subcategories:
             selected.subcategories?.map((sub) => ({
               id: sub.id,
               name: sub.name,
-              image: sub.file_name
-                ? `${BASE_URL}/${sub.file_name}`
-                : "/nine.png",
+              image: getImage(sub.file_name),
 
-              // ✅ THIRD LEVEL (item_categories)
               sub_categories:
                 sub.item_categories?.map((item) => ({
                   id: item.id,
@@ -66,7 +66,15 @@ const Compound = () => {
 
           {/* LEFT IMAGE */}
           <div className="col-lg-4">
-            <img src={category.image} alt={category.name} width="100%" />
+            <img
+              src={category.image}
+              alt={category.name}
+              style={{
+                width: "100%",
+                height: "300px",
+                objectFit: "contain",
+              }}
+            />
           </div>
 
           {/* RIGHT SIDE */}
@@ -84,16 +92,15 @@ const Compound = () => {
 
                       <FaArrowRight
                         onClick={() =>
-                          navigate(
-                            `/category/${createSlug(item.name)}`,
-                            { state: { id: item.id } }
-                          )
+                          navigate(`/category/${createSlug(item.name)}`, {
+                            state: { id: item.id },
+                          })
                         }
                         style={{ cursor: "pointer" }}
                       />
                     </div>
 
-                    {/* ✅ ITEM CATEGORIES LIST */}
+                    {/* ITEM CATEGORIES */}
                     <ul className="mt-3 ps-3">
                       {item.sub_categories.map((sub) => (
                         <li key={sub.id} style={{ fontSize: "14px" }}>
