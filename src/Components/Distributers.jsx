@@ -13,46 +13,45 @@ const TradingList = () => {
 
     const observer = useRef();
 
-    // ================= API CALL =================
+    // ================= API =================
     const fetchCompanies = async (pageNo) => {
         try {
             setLoading(true);
 
             const res = await fetch(
-                `https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=12&page=${pageNo}&is_trading=1&activity=`
+                `https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=12&page=${pageNo}&is_trading=1`
             );
 
             const data = await res.json();
 
             const newCompanies = data?.companies || [];
 
-            // append data (IMPORTANT)
-            setCompanies((prev) => [...prev, ...newCompanies]);
+            // ✅ IMPORTANT: replace data (NOT append)
+            setCompanies(newCompanies);
 
-            // stop when all data loaded
-            if (companies.length + newCompanies.length >= data?.total) {
+            if (pageNo * 12 >= data?.total) {
                 setHasMore(false);
             }
 
             setLoading(false);
+
+            // ✅ EXACT WEBSITE SCROLL (instant jump)
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+            }, 50);
+
         } catch (err) {
             console.log(err);
             setLoading(false);
         }
     };
 
-    // first load
     useEffect(() => {
-        fetchCompanies(1);
-    }, []);
-
-    // load next page
-    useEffect(() => {
-        if (page === 1) return;
         fetchCompanies(page);
     }, [page]);
 
-    // ================= INFINITE SCROLL =================
+    // ================= INFINITE TRIGGER =================
     const lastCompanyRef = (node) => {
         if (loading) return;
 
@@ -84,9 +83,9 @@ const TradingList = () => {
         <div className="container-fluid mt-3">
             <div className="row">
 
-                {/* ================= SIDEBAR (NOT DELETED) ================= */}
+                {/* SIDEBAR */}
                 <div className="col-md-3">
-                    <h6>Company Name</h6>
+                    <h6 className="fw-bold">Company Name</h6>
 
                     <input
                         className="form-control mb-3"
@@ -96,9 +95,8 @@ const TradingList = () => {
                     />
                 </div>
 
-                {/* ================= MAIN ================= */}
+                {/* MAIN */}
                 <div className="col-md-9">
-
                     <div className="row">
 
                         {filtered.map((item, index) => {
@@ -111,10 +109,10 @@ const TradingList = () => {
                                     key={item.id || index}
                                     ref={isLast ? lastCompanyRef : null}
                                 >
-                                    <div className="border rounded p-3 bg-white">
+                                    <div className="border rounded p-3 bg-white shadow-sm h-100">
 
+                                        {/* HEADER */}
                                         <div className="d-flex gap-3">
-
                                             <img
                                                 src={getImage(item)}
                                                 alt="logo"
@@ -128,29 +126,32 @@ const TradingList = () => {
                                             />
 
                                             <div>
-                                                <h6>{item.organization_name}</h6>
+                                                <h6 className="fw-bold mb-1">
+                                                    {item.organization_name}
+                                                </h6>
 
-                                                <p className="mb-1">
+                                                <p className="mb-1 small">
                                                     <b>Location:</b>{" "}
                                                     {item.company_location || item.user?.address || "N/A"}
-                                                </p>
-
-                                                <p className="mb-1">
-                                                    <b>Website:</b>{" "}
-                                                    {item.user?.website || item.company_website || "N/A"}
-                                                </p>
-
-                                                <p className="mb-1">
-                                                    <b>Activity:</b>{" "}
-                                                    {item.activity_name || "Trading/Distribution"}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="mt-2">
+                                        {/* DETAILS */}
+                                        <div className="mt-2 small">
+                                            <p className="mb-1">
+                                                <b>Website:</b>{" "}
+                                                {item.user?.website || item.company_website || "N/A"}
+                                            </p>
+
                                             <p className="mb-1">
                                                 <b>Core Activity:</b>{" "}
                                                 {item.core_activity_name || "Services"}
+                                            </p>
+
+                                            <p className="mb-1">
+                                                <b>Activity:</b>{" "}
+                                                {item.activity_name || "Trading/Distribution"}
                                             </p>
 
                                             <p className="mb-1">
@@ -164,6 +165,36 @@ const TradingList = () => {
                                             </p>
                                         </div>
 
+                                        {/* TAGS */}
+                                        <div className="mt-2">
+                                            {(item?.tags || item?.products || []).map((tag, i) => {
+
+                                                const label =
+                                                    typeof tag === "string"
+                                                        ? tag
+                                                        : tag?.title || tag?.name || "N/A";
+
+                                                return (
+                                                    <span
+                                                        key={i}
+                                                        style={{
+                                                            background: "#ff6a00",
+                                                            color: "#fff",
+                                                            padding: "4px 8px",
+                                                            borderRadius: "4px",
+                                                            fontSize: "11px",
+                                                            marginRight: "5px",
+                                                            display: "inline-block",
+                                                            marginBottom: "5px"
+                                                        }}
+                                                    >
+                                                        {label}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* BUTTON */}
                                         <button
                                             className="btn btn-primary w-100 mt-3"
                                             onClick={() => navigate(`/company/${item.id}`)}
@@ -175,12 +206,10 @@ const TradingList = () => {
                                 </div>
                             );
                         })}
-
                     </div>
 
-                    {loading && <p>Loading...</p>}
+                    {loading && <p className="text-center">Loading...</p>}
                     {!hasMore && <p className="text-center">All companies loaded</p>}
-
                 </div>
             </div>
         </div>

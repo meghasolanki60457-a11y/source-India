@@ -1,102 +1,139 @@
 import React, { useEffect, useState } from "react";
 
 const EnquiryPage = () => {
-
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const BASE_URL = "https://react-live.sourceindia-electronics.com/v1/";
 
+  // ✅ FETCH API
+  const fetchData = async (pageNo) => {
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        `https://react-live.sourceindia-electronics.com/v1/api/open_enquiries/front-enquiry?is_delete=0&page=${pageNo}`
+      );
+
+      const result = await res.json();
+
+      let list = [];
+
+      if (Array.isArray(result)) {
+        list = result;
+      } else if (Array.isArray(result?.data)) {
+        list = result.data;
+      } else if (Array.isArray(result?.data?.enquiries)) {
+        list = result.data.enquiries;
+      }
+
+      if (list.length === 0) {
+        setHasMore(false);
+      } else {
+        // 🔥 IMPORTANT: APPEND ONLY (NO DELETE)
+        setData((prev) => [...prev, ...list]);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
+    setLoading(false);
+  };
+
+  // first load + page change
   useEffect(() => {
-    fetch(
-      "https://react-live.sourceindia-electronics.com/v1/api/open_enquiries/front-enquiry?is_home=1&is_delete=0"
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        console.log("API RESPONSE 👉", res);
+    fetchData(page);
+  }, [page]);
 
-        // ✅ FIX: correct data extraction
-        const list =
-          Array.isArray(res?.data)
-            ? res.data
-            : Array.isArray(res)
-            ? res
-            : [];
+  // ✅ SINGLE PAGE SCROLL (window)
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
 
-        setData(list);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
-  }, []);
+      if (scrollTop + windowHeight >= fullHeight - 100) {
+        if (!loading && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading, hasMore]);
 
   return (
     <div className="container mt-4">
+      <h3 className="text-center mb-4">All Enquiry</h3>
 
-      <h3 className="text-center mb-4">Open Enquiry</h3>
+      <div className="row">
+        {data.map((item) => {
+          const img = item.company_logo
+            ? BASE_URL + item.company_logo
+            : "https://via.placeholder.com/80";
 
-      {loading ? (
-        <p className="text-center">Loading...</p>
-      ) : data.length === 0 ? (
-        <p className="text-center">No Data Found</p>
-      ) : (
+          return (
+            <div className="col-md-4 mb-4" key={item.id}>
+              <div className="card p-3 h-100">
 
-        <div className="row">
+                <img
+                  src={img}
+                  alt="logo"
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    objectFit: "contain",
+                    border: "1px solid #eee",
+                    borderRadius: "6px",
+                  }}
+                />
 
-          {data.map((item) => {
+                <h5 className="mt-2">{item.title}</h5>
 
-            // ✅ IMAGE FIX (IMPORTANT)
-            const img =
-              item.company_logo
-                ? BASE_URL + item.company_logo
-                : "https://via.placeholder.com/80";
+                <p><b>Description:</b> {item.description}</p>
 
-            return (
-              <div className="col-md-4 mb-4" key={item.id}>
+                <hr />
 
-                <div className="card p-3 h-100">
+                <p>
+                  <b>Name:</b>{" "}
+                  {item.name ||
+                    `${item.fname || ""} ${item.lname || ""}`}
+                </p>
 
-                  {/* IMAGE */}
-                  <img
-                    src={img}
-                    alt="logo"
-                    style={{
-                      width: "80px",
-                      height: "80px",
-                      objectFit: "contain",
-                      border: "1px solid #eee",
-                      borderRadius: "6px"
-                    }}
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/80";
-                    }}
-                  />
+                <p>
+                  <b>Company:</b>{" "}
+                  {item.company || item.organization_name || "N/A"}
+                </p>
 
-                  {/* TITLE */}
-                  <h5 className="mt-2">{item.title}</h5>
+                <p>
+                  <b>Date:</b>{" "}
+                  {item.created_at
+                    ? new Date(item.created_at).toLocaleString("en-IN")
+                    : "N/A"}
+                </p>
 
-                  {/* DESCRIPTION */}
-                  <p>{item.description}</p>
-
-                  <hr />
-
-                  <p><b>Name:</b> {item.name || `${item.fname || ""} ${item.lname || ""}`}</p>
-                  <p><b>Email:</b> {item.email || "N/A"}</p>
-                  <p><b>Phone:</b> {item.phone || "N/A"}</p>
-                  <p><b>Company:</b> {item.company || item.organization_name || "N/A"}</p>
-
-                </div>
+                <button className="btn btn-primary w-100">
+                  Reply
+                </button>
 
               </div>
-            );
-          })}
+            </div>
+          );
+        })}
+      </div>
 
-        </div>
-
+      {/* loader */}
+      {loading && (
+        <p className="text-center">Loading...</p>
       )}
 
+      {!hasMore && (
+        <p className="text-center text-muted">No more data</p>
+      )}
     </div>
   );
 };

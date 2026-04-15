@@ -6,20 +6,13 @@ const Compound = () => {
   const [category, setCategory] = useState(null);
   const navigate = useNavigate();
 
-  const BASE_URL = "https://react-live.sourceindia-electronics.com/v1";
+  const BASE_URL = "https://react-live.sourceindia-electronics.com/v1/";
 
-  // slug
   const createSlug = (name) => {
     return name
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^\w-]+/g, "");
-  };
-
-  // image helper (IMPORTANT FIX)
-  const getImage = (file) => {
-    if (!file) return "/nine.png";
-    return file.startsWith("http") ? file : `${BASE_URL}/${file}`;
   };
 
   useEffect(() => {
@@ -35,24 +28,7 @@ const Compound = () => {
         const selected = list[0];
         if (!selected) return;
 
-        setCategory({
-          id: selected.id,
-          name: selected.name,
-          image: getImage(selected.file_name),
-
-          subcategories:
-            selected.subcategories?.map((sub) => ({
-              id: sub.id,
-              name: sub.name,
-              image: getImage(sub.file_name),
-
-              sub_categories:
-                sub.item_categories?.map((item) => ({
-                  id: item.id,
-                  name: item.name,
-                })) || [],
-            })) || [],
-        });
+        setCategory(selected);
       })
       .catch((err) => console.log(err));
   }, []);
@@ -64,17 +40,21 @@ const Compound = () => {
       <div className="container">
         <div className="row gy-4">
 
-          {/* LEFT IMAGE */}
+          {/* LEFT IMAGE + BUTTON */}
           <div className="col-lg-4">
-            <img
-              src={category.image}
-              alt={category.name}
-              style={{
-                width: "100%",
-                height: "300px",
-                objectFit: "contain",
-              }}
-            />
+            <div className="big-card position-relative">
+
+              <img
+                src={BASE_URL + category.file_name}
+                alt={category.name}
+                className="img-fluid big-image"
+              />
+
+              <button className="btn btn-danger view-btn">
+                View All →
+              </button>
+
+            </div>
           </div>
 
           {/* RIGHT SIDE */}
@@ -82,36 +62,52 @@ const Compound = () => {
             <h2 className="fw-bold mb-4">{category.name}</h2>
 
             <div className="row gy-4">
-              {category.subcategories.map((item) => (
-                <div className="col-md-6" key={item.id}>
-                  <div className="category-card p-3 bg-white shadow-sm">
+              {category.subcategories
+                ?.filter(Boolean)
+                .map((item) => (
+                  <div className="col-md-6" key={item.id}>
+                    <div className="category-card d-flex justify-content-between align-items-start p-3 bg-white shadow-sm">
 
-                    {/* SUBCATEGORY HEADER */}
-                    <div className="d-flex justify-content-between align-items-center">
-                      <h5>{item.name}</h5>
+                      {/* LEFT TEXT */}
+                      <div style={{ width: "65%" }}>
+                        <div className="d-flex align-items-center mb-2">
+                          <h6 className="fw-bold mb-0">{item.name}</h6>
 
-                      <FaArrowRight
-                        onClick={() =>
-                          navigate(`/category/${createSlug(item.name)}`, {
-                            state: { id: item.id },
-                          })
-                        }
-                        style={{ cursor: "pointer" }}
-                      />
+                          {/* ✅ FIXED CLICK */}
+                          <FaArrowRight
+                            className="ms-2"
+                            style={{ cursor: "pointer" }}
+                            onClick={() =>
+                              navigate(`/category/${createSlug(item.name)}`, {
+                                state: { id: item.id },
+                              })
+                            }
+                          />
+                        </div>
+
+                        <ul className="ps-3 mb-0 sub-list">
+                          {item.item_categories?.map((sub) => (
+                            <li key={sub.id}>{sub.name}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* RIGHT IMAGE */}
+                      <div style={{ width: "30%", textAlign: "right" }}>
+                        <img
+                          src={BASE_URL + item.file_name}
+                          alt={item.name}
+                          style={{
+                            maxHeight: "100px",
+                            width: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      </div>
+
                     </div>
-
-                    {/* ITEM CATEGORIES */}
-                    <ul className="mt-3 ps-3">
-                      {item.sub_categories.map((sub) => (
-                        <li key={sub.id} style={{ fontSize: "14px" }}>
-                          {sub.name}
-                        </li>
-                      ))}
-                    </ul>
-
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
 
           </div>

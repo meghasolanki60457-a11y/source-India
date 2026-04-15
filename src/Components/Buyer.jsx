@@ -5,64 +5,45 @@ const Buyer = () => {
   const navigate = useNavigate();
 
   const [companies, setCompanies] = useState([]);
-  const [itemCategories, setItemCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-
-  const [search, setSearch] = useState("");
+  const [categories, setCategories] = useState([]);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
   const baseURL = "https://react-live.sourceindia-electronics.com/v1/";
 
-  // ================= FETCH COMPANIES (177 FIX) =================
-  const fetchCompanies = async (pageNo) => {
-    try {
-      setLoadingMore(true);
+  // ================= FETCH COMPANIES =================
+  const fetchCompanies = async (pageNo = 1) => {
+    const res = await fetch(
+      `${baseURL}api/products/companies?is_delete=0&status=1&limit=12&page=${pageNo}&is_seller=0`
+    );
 
-      const res = await fetch(
-        `https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=12&page=${pageNo}&is_seller=0&activity=`
-      );
+    const data = await res.json();
+    const list = data?.companies || [];
 
-      const data = await res.json();
+    setCompanies((prev) =>
+      pageNo === 1 ? list : [...prev, ...list]
+    );
 
-      const list = Array.isArray(data?.companies)
-        ? data.companies.filter((c) => c && c.id)
-        : [];
-
-      if (pageNo === 1) {
-        setCompanies(list);
-      } else {
-        setCompanies((prev) => [...prev, ...list]);
-      }
-
-      // 🔥 IMPORTANT FIX FOR 177 TOTAL
-      if (list.length === 0 || list.length < 12) {
-        setHasMore(false);
-      }
-
-      setLoading(false);
-    } catch (err) {
-      console.log(err);
-      setLoading(false);
-    } finally {
-      setLoadingMore(false);
-    }
+    if (list.length < 12) setHasMore(false);
   };
 
-  // FIRST LOAD
+  // ================= FETCH CATEGORIES =================
+  const fetchCategories = async () => {
+    const res = await fetch(
+      `${baseURL}api/categories?is_delete=0&status=1`
+    );
+
+    const data = await res.json();
+    setCategories(data?.data || data || []);
+  };
+
   useEffect(() => {
     fetchCompanies(1);
+    fetchCategories();
   }, []);
 
-  // PAGE CHANGE
-  useEffect(() => {
-    if (page === 1) return;
-    fetchCompanies(page);
-  }, [page]);
-
-  // ================= INFINITE SCROLL =================
+  // ================= SCROLL (INFINITE) =================
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -70,8 +51,7 @@ const Buyer = () => {
       const fullHeight = document.documentElement.scrollHeight;
 
       if (
-        scrollTop + windowHeight >= fullHeight - 200 &&
-        !loadingMore &&
+        scrollTop + windowHeight >= fullHeight - 150 &&
         hasMore
       ) {
         setPage((prev) => prev + 1);
@@ -80,111 +60,130 @@ const Buyer = () => {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [loadingMore, hasMore]);
+  }, [hasMore]);
 
-  // ================= ITEM CATEGORY (UNCHANGED) =================
+  // ================= PAGE CHANGE HANDLER =================
   useEffect(() => {
-    fetch(
-      "https://react-live.sourceindia-electronics.com/v1/api/item_category/getitem?status=1"
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setItemCategories(Array.isArray(data) ? data : data?.data || []);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+    if (page > 1) {
+      fetchCompanies(page);
 
-  // ================= IMAGE =================
-  const getImage = (item) => {
-    if (!item?.company_logo_file) {
-      return "https://sourceindia-electronics.com/default.png";
+      // scroll to top for next page
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 100);
     }
-    return `${baseURL}${item.company_logo_file}`;
+  }, [page]);
+
+  const getImage = (item) => {
+    return item?.company_logo_file
+      ? `${baseURL}${item.company_logo_file}`
+      : "https://sourceindia-electronics.com/default.png";
   };
 
   return (
-    <div className="container-fluid mt-3">
+    <div className="container-fluid">
+
       <div className="row">
 
-        {/* ================= SIDEBAR (NO CHANGE AT ALL) ================= */}
+        {/* ================= SIDEBAR ================= */}
         <div className="col-md-3">
-          <h6>Company Name</h6>
+
+          <div className="bg-primary text-white p-2 fw-bold">
+            Company Name
+          </div>
 
           <input
             className="form-control mb-3"
-            placeholder="Search company..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search companies..."
           />
 
-          <h6>Item Category</h6>
-          {itemCategories.map((cat, i) => (
-            <div className="form-check" key={i}>
-              <input type="checkbox" className="form-check-input" />
-              <label>{cat?.name || cat?.category_name}</label>
-            </div>
-          ))}
+          <div className="bg-primary text-white p-2 fw-bold">
+            Item Category
+          </div>
+
+          <div
+            style={{
+              maxHeight: 450,
+              overflowY: "auto",
+              border: "1px solid #ddd",
+              padding: 5,
+            }}
+          >
+            {categories.map((cat) => (
+              <div key={cat.id} style={{ padding: "5px" }}>
+                <input type="checkbox" />{" "}
+                {cat.name || cat.category_name || "N/A"}
+              </div>
+            ))}
+          </div>
+
         </div>
 
-        {/* ================= RIGHT SIDE ================= */}
+        {/* ================= MAIN ================= */}
         <div className="col-md-9">
 
-          {loading ? (
-            <p>Loading companies...</p>
-          ) : (
-            <div className="row">
+          <div className="row">
 
-              {companies.map((item) => (
-                <div className="col-md-6 mb-4" key={item.id}>
-                  <div className="company-card p-3 border rounded">
+            {companies.map((item) => (
+              <div key={item.id} className="col-md-6 mb-3">
+
+                <div className="border bg-white p-3 h-100">
+
+                  <div className="d-flex gap-2">
 
                     <img
                       src={getImage(item)}
-                      alt="company"
                       style={{
-                        width: "120px",
-                        height: "120px",
+                        width: 70,
+                        height: 70,
                         objectFit: "contain",
+                        border: "1px solid #ddd",
                       }}
                     />
 
-                    <h6 className="mt-2">
-                      {item.organization_name}
-                    </h6>
-
-                    <p>
-                      <b>Location:</b>{" "}
-                      {item.company_location ||
-                        item.address ||
-                        item.city_name ||
-                        "N/A"}
-                    </p>
-
-                    <button
-                      className="btn btn-primary w-100 mt-2"
-                      onClick={() =>
-                        navigate(`/buyer-connect/${item.id}?type=source`)
-                      }
-                    >
-                      Connect
-                    </button>
+                    <div>
+                      <h6 className="mb-1">
+                        {item.organization_name}
+                      </h6>
+                      <small>
+                        {item.company_location || "N/A"}
+                      </small>
+                    </div>
 
                   </div>
+
+                  <p className="mt-2 mb-2">
+                    <b>Product:</b>{" "}
+                    {item.product_name ||
+                      item.products?.map((p) => p.name).join(", ") ||
+                      item.user?.products ||
+                      "N/A"}
+                  </p>
+
+                  <button
+                    className="btn w-100"
+                    style={{
+                      background: "#ff6a00",
+                      color: "#fff",
+                    }}
+                    onClick={() =>
+                      navigate(`/buyer-connect/${item.id}`)
+                    }
+                  >
+                    Connect
+                  </button>
+
                 </div>
-              ))}
 
-            </div>
-          )}
+              </div>
+            ))}
 
-          {/* LOADING MORE */}
-          {loadingMore && (
-            <p className="text-center text-primary">
-              Loading more companies...
-            </p>
-          )}
+          </div>
 
         </div>
+
       </div>
+
     </div>
   );
 };

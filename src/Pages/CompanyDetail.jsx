@@ -3,93 +3,164 @@ import { useParams } from "react-router-dom";
 
 const CompanyDetail = () => {
   const { id } = useParams();
+
   const [company, setCompany] = useState(null);
-
-  useEffect(() => {
-    fetch(
-      `https://react-live.sourceindia-electronics.com/v1/api/products/companies/${id}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("FULL API:", data); // 🔥 check structure
-        setCompany(data?.data || data);
-      })
-      .catch((err) => console.log(err));
-  }, [id]);
-
-  if (!company) return <div className="text-center py-5">Loading...</div>;
+  const [loading, setLoading] = useState(true);
 
   const baseURL = "https://react-live.sourceindia-electronics.com/v1/";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch(
+        `https://react-live.sourceindia-electronics.com/v1/api/products/companies/${id}`
+      );
+
+      const data = await res.json();
+      setCompany(data || null);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [id]);
+
+  if (loading) return <h3 className="text-center py-5">Loading...</h3>;
+  if (!company) return <h3 className="text-center py-5">No Data Found</h3>;
 
   return (
     <div className="container py-4">
 
-      <div className="card p-4">
+      {/* ================= TOP CARD ================= */}
+      <div className="card p-4 shadow-sm">
 
-        {/* LOGO */}
-        <img
-          src={
-            company.company_logo_file
-              ? baseURL + company.company_logo_file
-              : "https://sourceindia-electronics.com/default.png"
-          }
-          alt="logo"
-          style={{ width: "120px" }}
-        />
+        <div className="row">
 
-        {/* BASIC INFO */}
-        <h4 className="mt-3">{company.organization_name}</h4>
+          {/* LEFT SIDE */}
+          <div className="col-md-8">
 
-        <p><b>Location:</b> {company.company_location || company.user?.address || "N/A"}</p>
+            <div className="d-flex gap-3 align-items-center mb-3">
 
-        <p>
-          <b>Website:</b>{" "}
-          {company.company_website || company.user?.website || "N/A"}
-        </p>
+              <img
+                src={
+                  company.company_logo_file
+                    ? baseURL + company.company_logo_file
+                    : "https://via.placeholder.com/100"
+                }
+                style={{ width: 80 }}
+              />
 
-        <p><b>Core Activity:</b> {company.core_activity_name || "N/A"}</p>
+              <h4 style={{ color: "orange" }}>
+                {company.organization_name}
+              </h4>
 
-        <p><b>Category:</b> {company.category_name || "N/A"}</p>
+            </div>
 
-        <p><b>Sub Category:</b> {company.sub_category_name || "N/A"}</p>
+            <p>
+              📍 <b>Address:</b> {company.address}
+            </p>
 
-        <p><b>Activity:</b> Trading / Distribution</p>
+            <div className="row">
 
-        {/* DESCRIPTION */}
-        <p className="mt-2">
-          <b>Description:</b>{" "}
-          {company.organizations_product_description || "No description"}
-        </p>
+              <div className="col-md-6">
+                <p>🌍 <b>Country:</b> {company.country_name}</p>
+                <p>🏙 <b>State:</b> {company.state_name}</p>
+                <p>🏢 <b>City:</b> {company.city_name}</p>
+              </div>
 
+              <div className="col-md-6">
+                <p>📧 <b>Email:</b> {company.email || "N/A"}</p>
+                <p>📞 <b>Phone:</b> {company.phone || "N/A"}</p>
+                <p>🌐 <b>Website:</b> {company.company_website}</p>
+              </div>
+
+            </div>
+
+            <hr />
+
+            <p>
+              <b>Core Activity:</b> {company.coreactivity_name}
+            </p>
+
+            <p>
+              <b>Activity:</b> {company.activity_name}
+            </p>
+
+            <p>
+              <b>Category:</b> {company.category_name}
+            </p>
+
+            <p>
+              <b>Sub Category:</b> {company.sub_category_name}
+            </p>
+
+            <hr />
+
+            <p>
+              <b>About:</b> {company.brief_company}
+            </p>
+
+            <p>
+              {company.organizations_product_description}
+            </p>
+
+          </div>
+
+          {/* RIGHT SIDE (SIDEBAR) */}
+          <div className="col-md-4">
+
+            <div className="border p-3 rounded">
+
+              <h6>⭐ Rating & Review</h6>
+
+              <input className="form-control mb-2" placeholder="Rating" />
+              <textarea className="form-control mb-2" placeholder="Review" />
+
+              <button className="btn btn-primary w-100">
+                Submit
+              </button>
+
+            </div>
+
+            <div className="border p-3 rounded mt-3 text-center">
+
+              <h6>To List Your Product</h6>
+
+              <button className="btn btn-warning w-100">
+                Register Now
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
       </div>
 
-      {/* PRODUCTS */}
+      {/* ================= PRODUCTS ================= */}
       <h5 className="mt-4">Products</h5>
 
       <div className="row">
-        {company.products?.length > 0 ? (
-          company.products.map((item) => (
-            <div className="col-md-3 mb-3" key={item.id}>
-              <div className="card p-3 text-center">
 
-                <img
-                  src={
-                    item.image
-                      ? baseURL + item.image
-                      : "https://sourceindia-electronics.com/default.png"
-                  }
-                  alt={item.title}
-                  style={{ height: "60px", objectFit: "contain" }}
-                />
+        {(company.products || []).map((item) => (
+          <div className="col-md-3 mb-3" key={item.id}>
 
-                <p className="mt-2">{item.title}</p>
+            <div className="card text-center p-3">
 
-              </div>
+              <img
+                src={item.image ? baseURL + item.image : ""}
+                style={{ height: 80, objectFit: "contain" }}
+              />
+
+              <p>{item.title}</p>
+
+              <button className="btn btn-primary btn-sm">
+                View →
+              </button>
+
             </div>
-          ))
-        ) : (
-          <p>No products available</p>
-        )}
+
+          </div>
+        ))}
+
       </div>
 
     </div>

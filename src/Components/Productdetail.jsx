@@ -1,107 +1,91 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const Productdetail = () => {
   const { slug } = useParams();
-  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [activeTab, setActiveTab] = useState("product");
   const [mainImage, setMainImage] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const imgBase =
-    "https://react-live.sourceindia-electronics.com/v1/";
+  const BASE_URL = "https://react-live.sourceindia-electronics.com/";
+  const DEFAULT_IMG =
+    "https://sourceindia-electronics.com/default.png";
+
+  // ✅ FINAL IMAGE FUNCTION (PRODUCT + COMPANY FIX)
+  const getImageUrl = (img) => {
+    if (!img) return DEFAULT_IMG;
+
+    // object handling
+    if (typeof img === "object") {
+      img =
+        img.file_name ||
+        img.image ||
+        img.url ||
+        "";
+    }
+
+    if (!img) return DEFAULT_IMG;
+
+    // already full URL
+    if (img.startsWith("http")) return img;
+
+    // remove starting slash
+    img = img.replace(/^\/+/, "");
+
+    // 🔥 IMPORTANT FIX FOR COMPANY LOGO
+    if (img.startsWith("upload/")) {
+      return BASE_URL + "v1/" + img;
+    }
+
+    return BASE_URL + img;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // STEP 1: DETAILS API (MAIN DATA)
         const res1 = await axios.get(
-          `https://react-live.sourceindia-electronics.com/v1/api/products/details/${slug}`
+          `${BASE_URL}v1/api/products/details/${slug}`
         );
 
         const data1 =
-          res1.data?.data?.product || res1.data?.data || res1.data;
+          res1.data?.data?.product ||
+          res1.data?.data ||
+          res1.data;
 
-        // STEP 2: FULL PRODUCT API (ADDITIONAL DATA)
         const res2 = await axios.get(
-          `https://react-live.sourceindia-electronics.com/v1/api/products/${data1.id}`
+          `${BASE_URL}v1/api/products/${data1.id}`
         );
 
         const data2 =
-          res2.data?.data?.product || res2.data?.data || res2.data;
+          res2.data?.data?.product ||
+          res2.data?.data ||
+          res2.data;
 
-        // 🔥 FINAL SAFE MERGE (NO LOSS)
         const merged = {
           ...data2,
           ...data1,
-
-          // PRODUCT INFO
-          category_name:
-            data1.category_name || data2.category_name,
-
-          sub_category_name:
-            data1.sub_category_name || data2.sub_category_name,
-
-          item_category_name:
-            data1.item_category_name || data2.item_category_name,
-
-          item_subcategory_name:
-            data1.item_subcategory_name ||
-            data2.item_subcategory_name,
-
-          short_description:
-            data1.short_description ||
-            data2.short_description,
-
-          description:
-            data1.description || data2.description,
-
-          organizations_product_description:
-            data1.organizations_product_description ||
-            data2.organizations_product_description,
-
-          // COMPANY (FOR SIDEBAR LIKE YOUR IMAGE)
-          company_name:
-            data1.company_name || data2.company_name,
-
-          company_location:
-            data1.company_location || data2.company_location,
-
-          core_activity_name:
-            data1.core_activity_name || data2.core_activity_name,
-
-          brief_company:
-            data1.brief_company || data2.brief_company,
-
-          company_logo:
-            data1.company_logo || data2.company_logo,
-
-          // IMAGES
           images:
-            data1.images?.length
+            data1.images?.length > 0
               ? data1.images
               : data2.images || [],
-
-          // SIMILAR PRODUCTS
-          similar_products:
-            data1.similar_products?.length
-              ? data1.similar_products
-              : data2.similar_products || [],
-
-          // REVIEWS
-          reviews:
-            data1.reviews?.length
-              ? data1.reviews
-              : data2.reviews || [],
         };
 
         setProduct(merged);
 
-        setMainImage(
-          imgBase + (merged.file_name || merged.images?.[0])
-        );
+        let firstImg = "";
+
+        if (merged.file_name) {
+          firstImg = merged.file_name;
+        } else if (merged.images?.length) {
+          firstImg = merged.images[0];
+        }
+
+        setMainImage(getImageUrl(firstImg));
+        setCurrentIndex(0);
+
       } catch (err) {
         console.log(err);
       }
@@ -110,185 +94,259 @@ const Productdetail = () => {
     fetchData();
   }, [slug]);
 
+  // SLIDER
+  const handleNext = () => {
+    if (!product?.images?.length) return;
+
+    const next =
+      (currentIndex + 1) % product.images.length;
+
+    setCurrentIndex(next);
+    setMainImage(getImageUrl(product.images[next]));
+  };
+
+  const handlePrev = () => {
+    if (!product?.images?.length) return;
+
+    const prev =
+      (currentIndex - 1 + product.images.length) %
+      product.images.length;
+
+    setCurrentIndex(prev);
+    setMainImage(getImageUrl(product.images[prev]));
+  };
+
   if (!product)
     return <div className="text-center p-5">Loading...</div>;
 
   return (
     <div className="container my-4">
 
-      {/* 🔥 TOP SECTION (LIKE YOUR IMAGE) */}
-      <div className="row bg-white p-3 shadow-sm rounded">
+      <div className="row bg-white p-4 rounded shadow-sm">
 
-        {/* LEFT IMAGE GALLERY */}
+        {/* IMAGE */}
         <div className="col-md-4 text-center">
+          <div className="position-relative">
 
-          <img
-            src={mainImage}
-            className="img-fluid"
-            style={{ maxHeight: 320, objectFit: "contain" }}
-            alt=""
-          />
+            <img
+              src={mainImage}
+              className="img-fluid"
+              style={{
+                height: 260,
+                objectFit: "contain",
+                width: "100%",
+              }}
+              alt=""
+              onError={(e) => {
+                e.target.src = DEFAULT_IMG;
+              }}
+            />
 
-          <div className="d-flex gap-2 mt-2 justify-content-center">
+            <button onClick={handlePrev}>❮</button>
+            <button onClick={handleNext}>❯</button>
+
+          </div>
+
+          {/* THUMBNAILS */}
+          <div className="d-flex gap-2 mt-3 justify-content-center flex-wrap">
+
             {product.images?.map((img, i) => (
               <img
                 key={i}
-                src={imgBase + img}
-                onClick={() =>
-                  setMainImage(imgBase + img)
-                }
+                src={getImageUrl(img)}
+                onClick={() => {
+                  setMainImage(getImageUrl(img));
+                  setCurrentIndex(i);
+                }}
                 style={{
                   width: 60,
                   height: 60,
+                  objectFit: "contain",
                   border: "1px solid #ddd",
                   cursor: "pointer",
-                  objectFit: "contain",
                 }}
                 alt=""
+                onError={(e) => {
+                  e.target.src = DEFAULT_IMG;
+                }}
               />
             ))}
+
           </div>
         </div>
 
-        {/* CENTER INFO */}
+        {/* INFO */}
         <div className="col-md-5">
+          <h3>{product.title}</h3>
 
-          <h3 className="fw-bold">{product.title}</h3>
-
-          <p className="text-muted">
-            {product.category_name} / {product.sub_category_name}
-          </p>
-
+          <p><b>Category:</b> {product.category_name}</p>
+          <p><b>Sub Category:</b> {product.sub_category_name}</p>
           <p><b>Item Category:</b> {product.item_category_name}</p>
-
           <p><b>Item Type:</b> {product.item_subcategory_name}</p>
 
-          {product.short_description && (
-            <div className="mt-2 text-muted">
-              {product.short_description}
-            </div>
-          )}
+          <p className="text-muted">
+            {product.short_description}
+          </p>
 
-          <button className="btn btn-warning mt-3">
+          <button className="btn btn-warning">
             Enquiry
           </button>
         </div>
 
-        {/* 🔥 RIGHT COMPANY BOX (LIKE IMAGE SIDEBAR) */}
-        <div className="col-md-3">
+        {/* COMPANY */}
+        <div className="col-md-3 text-center">
+          <div className="border p-3 rounded">
 
-          <div className="border p-3 rounded text-center">
-
+            {/* ✅ COMPANY LOGO FINAL FIX */}
             {product.company_logo && (
               <img
-                src={imgBase + product.company_logo}
+                src={getImageUrl(product.company_logo)}
                 style={{ width: 80 }}
                 alt=""
+                onError={(e) => {
+                  e.target.src = DEFAULT_IMG;
+                }}
               />
             )}
 
-            <h6 className="mt-2">{product.company_name}</h6>
+            <h6>{product.company_name}</h6>
 
             <p className="small text-muted">
               {product.company_location}
             </p>
 
-            <p className="small">
-              <b>Nature:</b> Manufacturing
-            </p>
+            <hr />
 
-            <p className="small">
-              <b>Core:</b> {product.core_activity_name}
+            <p><b>Nature:</b> Manufacturing</p>
+            <p>
+              <b>Core Activity:</b>{" "}
+              {product.core_activity_name}
             </p>
-
-            <button className="btn btn-outline-primary btn-sm w-100">
-              View Company Details
-            </button>
 
           </div>
-
         </div>
+
       </div>
 
-      {/* 🔥 TABS SECTION (BELOW) */}
-      <div className="bg-white mt-4 p-3 rounded shadow-sm">
+      {/* TABS */}
+      <div className="bg-white mt-4 p-3">
 
-        <ul className="nav nav-tabs">
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === "product" && "active"}`}
-              onClick={() => setActiveTab("product")}
-            >
-              Product Details
-            </button>
-          </li>
+        <div className="d-flex gap-3 border-bottom">
 
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === "company" && "active"}`}
-              onClick={() => setActiveTab("company")}
-            >
-              Company Details
-            </button>
-          </li>
+          <button onClick={() => setActiveTab("product")}>
+            Product Details
+          </button>
 
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === "reviews" && "active"}`}
-              onClick={() => setActiveTab("reviews")}
-            >
-              Reviews
-            </button>
-          </li>
-        </ul>
+          <button onClick={() => setActiveTab("company")}>
+            Company
+          </button>
+
+          <button onClick={() => setActiveTab("reviews")}>
+            Reviews
+          </button>
+
+        </div>
 
         <div className="mt-3">
 
-          {/* PRODUCT */}
           {activeTab === "product" && (
             <div
               dangerouslySetInnerHTML={{
                 __html:
-                  product.organizations_product_description ||
                   product.description ||
-                  "No description available",
+                  product.organizations_product_description ||
+                  "No description",
               }}
             />
           )}
 
-          {/* COMPANY */}
-          {activeTab === "company" && (
-            <div className="border p-3 rounded">
+         {activeTab === "company" && (
+  <div className="p-3">
 
-              <h5>{product.company_name}</h5>
+    {/* COMPANY HEADER */}
+    <div className="d-flex align-items-center gap-3 mb-3">
 
-              <p>{product.company_location}</p>
+      <img
+        src={getImageUrl(product.company_logo)}
+        alt=""
+        style={{
+          width: 80,
+          height: 80,
+          objectFit: "contain",
+          border: "1px solid #ddd",
+          padding: 5,
+        }}
+        onError={(e) => {
+          e.target.src =
+            "https://sourceindia-electronics.com/default.png";
+        }}
+      />
 
-              <p>{product.brief_company}</p>
+      <div>
+        <h5 className="mb-1">{product.company_name}</h5>
+        <p className="text-muted mb-0">
+          {product.company_location}
+        </p>
+        <small className="text-muted">
+          {product.company_slug}
+        </small>
+      </div>
 
-              <p>{product.core_activity_name}</p>
+    </div>
 
-            </div>
-          )}
+    <hr />
 
-          {/* REVIEWS */}
+    {/* DETAILS GRID */}
+    <div className="row">
+
+      <div className="col-md-6">
+        <p><b>Core Activity:</b> {product.core_activity_name}</p>
+        <p><b>Activity:</b> {product.activity_name}</p>
+        <p><b>Category:</b> {product.category_name}</p>
+        <p><b>Sub Category:</b> {product.sub_category_name}</p>
+      </div>
+
+      <div className="col-md-6">
+        <p><b>Created At:</b> {product.created_at?.split("T")[0]}</p>
+        <p><b>Company Type:</b> {product.core_activity_name}</p>
+      </div>
+
+    </div>
+
+    <hr />
+
+    {/* BRIEF COMPANY DESCRIPTION */}
+    <div>
+      <h6>About Company</h6>
+      <div
+        dangerouslySetInnerHTML={{
+          __html: product.brief_company,
+        }}
+      />
+    </div>
+
+    <hr />
+
+    {/* FULL DESCRIPTION (ORIGINAL STYLE) */}
+    <div>
+      <h6>Product Description</h6>
+      <div
+        dangerouslySetInnerHTML={{
+          __html:
+            product.organizations_product_description ||
+            product.description,
+        }}
+      />
+    </div>
+
+  </div>
+)}
           {activeTab === "reviews" && (
-            <>
-              {product.reviews?.length ? (
-                product.reviews.map((r, i) => (
-                  <div key={i} className="border p-2 mb-2 rounded">
-                    <b>{r.user_name}</b>
-                    <p>{r.comment}</p>
-                    <small>⭐ {r.rating}</small>
-                  </div>
-                ))
-              ) : (
-                <p>No reviews available</p>
-              )}
-            </>
+            <p>No reviews</p>
           )}
 
         </div>
+
       </div>
 
     </div>

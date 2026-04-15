@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 const AutomotiveSection = () => {
   const [data, setData] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [total, setTotal] = useState(0); // ✅ total count
+  const [products, setProducts] = useState([]); 
+  const [total, setTotal] = useState(0); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,18 +18,10 @@ const AutomotiveSection = () => {
       })
       .catch((err) => console.log(err));
 
-    // ================= PRODUCTS API (ALL PRODUCTS) =================
-    fetch(
-      "https://react-live.sourceindia-electronics.com/v1/api/products?is_delete=0&status=1&is_approve=1&limit=15&page=1"
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        console.log("PRODUCT API 👉", res);
+    // ❌ PRODUCTS API REMOVED
+    setProducts([]);
+    setTotal(0);
 
-        setProducts(res.products || []);
-        setTotal(res.total || 0); // ✅ total products count
-      })
-      .catch((err) => console.log(err));
   }, []);
 
   if (!data) {
@@ -100,9 +92,9 @@ const AutomotiveSection = () => {
         </div>
       ))}
 
-      {/* ✅ ALL PRODUCTS LIST */}
-      <h4 className="mt-4 mb-3">All Products</h4>
+      {/* ❌ REMOVED "All Products" HEADING */}
 
+      {/* ✅ PRODUCTS LIST (EMPTY BUT STRUCTURE SAME) */}
       <div className="row">
         {products.map((p) => (
           <div key={p.id} className="col-md-3 mb-3">
@@ -115,7 +107,6 @@ const AutomotiveSection = () => {
               />
 
               <div className="mt-2">
-                {/* ✅ PRODUCT NAME */}
                 <h6 className="small">{p.title}</h6>
 
                 <p className="small text-muted mb-0">

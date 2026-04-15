@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 const CompanyList = () => {
@@ -19,26 +19,27 @@ const CompanyList = () => {
 
   const LIMIT = 50;
 
+  const loaderRef = useRef(null);
+
+  const BASE_URL = "https://react-live.sourceindia-electronics.com/v1/";
+
   // ================= SIDEBAR APIs =================
   useEffect(() => {
-    fetch("https://react-live.sourceindia-electronics.com/v1/api/categories?is_delete=0&status=1")
+    fetch(`${BASE_URL}api/categories?is_delete=0&status=1`)
       .then(res => res.json())
-      .then(data => setCategories(Array.isArray(data) ? data : data?.data || []))
-      .catch(console.log);
+      .then(data => setCategories(data?.data || data || []));
   }, []);
 
   useEffect(() => {
-    fetch("https://react-live.sourceindia-electronics.com/v1/api/location/states/101")
+    fetch(`${BASE_URL}api/location/states/101`)
       .then(res => res.json())
-      .then(data => setStates(Array.isArray(data) ? data : data?.data || []))
-      .catch(console.log);
+      .then(data => setStates(data?.data || data || []));
   }, []);
 
   useEffect(() => {
-    fetch("https://react-live.sourceindia-electronics.com/v1/api/core_activities?is_delete=0&status=1")
+    fetch(`${BASE_URL}api/core_activities?is_delete=0&status=1`)
       .then(res => res.json())
-      .then(data => setCoreActivities(Array.isArray(data) ? data : data?.data || []))
-      .catch(console.log);
+      .then(data => setCoreActivities(data?.data || data || []));
   }, []);
 
   // ================= COMPANY API =================
@@ -47,7 +48,7 @@ const CompanyList = () => {
       setLoadingMore(true);
 
       const res = await fetch(
-        `https://react-live.sourceindia-electronics.com/v1/api/products/companies?is_delete=0&status=1&limit=${LIMIT}&page=${pageNo}&is_seller=1&activity=`
+        `${BASE_URL}api/products/companies?is_delete=0&status=1&limit=${LIMIT}&page=${pageNo}&is_seller=1`
       );
 
       const data = await res.json();
@@ -58,7 +59,7 @@ const CompanyList = () => {
         return;
       }
 
-      setCompanies((prev) =>
+      setCompanies(prev =>
         pageNo === 1 ? list : [...prev, ...list]
       );
 
@@ -75,31 +76,36 @@ const CompanyList = () => {
   };
 
   useEffect(() => {
-    fetchCompanies(page);
+    if (hasMore) fetchCompanies(page);
   }, [page]);
 
-  // ================= INFINITE SCROLL =================
+  // ================= 🔥 FIXED INFINITE SCROLL =================
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
 
-      if (
-        scrollTop + windowHeight >= fullHeight - 200 &&
-        !loadingMore &&
-        hasMore
-      ) {
-        setPage(prev => prev + 1);
+        if (target.isIntersecting && hasMore && !loadingMore && !loading) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "300px",
+        threshold: 0,
       }
+    );
+
+    const current = loaderRef.current;
+    if (current) observer.observe(current);
+
+    return () => {
+      if (current) observer.unobserve(current);
     };
+  }, [hasMore, loadingMore, loading]);
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [loadingMore, hasMore]);
-
-  // ================= FILTER =================
-  const filteredCompanies = companies.filter((item) =>
+  // ================= SEARCH =================
+  const filteredCompanies = companies.filter(item =>
     item.organization_name?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -109,7 +115,7 @@ const CompanyList = () => {
 
         {/* ================= SIDEBAR ================= */}
         <div className="col-md-3">
-          <div className="filter-box">
+          <div className="border p-3 rounded bg-light">
 
             <h6>Company Name</h6>
             <input
@@ -120,21 +126,21 @@ const CompanyList = () => {
             />
 
             <h6>Category</h6>
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <div key={cat.id}>
                 <input type="checkbox" /> {cat.name || cat.slug}
               </div>
             ))}
 
             <h6 className="mt-3">Core Activities</h6>
-            {coreActivities.map((act) => (
+            {coreActivities.map(act => (
               <div key={act.id}>
                 <input type="checkbox" /> {act.name || act.title}
               </div>
             ))}
 
             <h6 className="mt-3">State</h6>
-            {states.map((st) => (
+            {states.map(st => (
               <div key={st.id}>
                 <input type="checkbox" /> {st.name || st.state_name}
               </div>
@@ -153,69 +159,91 @@ const CompanyList = () => {
           ) : (
             <div className="row">
 
-              {filteredCompanies.map((item) => (
-                <div className="col-md-6 mb-4" key={item.id}>
-                  <div className="border p-3 rounded">
+              {filteredCompanies.map((item) => {
 
-                    {/* LOGO */}
-                    <img
-                      src={
-                        item.company_logo_file
-                          ? `https://react-live.sourceindia-electronics.com/v1/${item.company_logo_file}`
-                          : "https://via.placeholder.com/120"
-                      }
-                      alt=""
-                      style={{ width: 100, height: 100, objectFit: "contain" }}
-                    />
+                const tags = (item.products || [])
+                  .map(p => p.title?.trim())
+                  .filter(Boolean);
 
-                    {/* NAME */}
-                    <h6>{item.organization_name}</h6>
+                return (
+                  <div className="col-md-6 mb-4" key={item.id}>
+                    <div className="border p-3 rounded shadow-sm bg-white h-100">
 
-                    {/* ================= SHORT DISPLAY ONLY (NO DATA DELETE) ================= */}
-                    <p>
-                      <b>About:</b>{" "}
-                      {item.brief_company
-                        ? item.brief_company.slice(0, 120) + "..."
-                        : "N/A"}
-                    </p>
+                      <div className="d-flex gap-3 align-items-center mb-2">
+                        <img
+                          src={
+                            item.company_logo_file
+                              ? `${BASE_URL}${item.company_logo_file}`
+                              : "https://via.placeholder.com/100"
+                          }
+                          alt=""
+                          style={{ width: 80, height: 80, objectFit: "contain" }}
+                        />
+                        <h5>{item.organization_name}</h5>
+                      </div>
 
-                    <p>
-                      <b>Location:</b>{" "}
-                      {item.company_location?.slice(0, 80) || "N/A"}
-                    </p>
+                      <p><b>Location:</b> {item.company_location || "N/A"}</p>
 
-                    <p><b>Phone:</b> {item.company_phone || "N/A"}</p>
-                    <p><b>Website:</b> {item.company_website || "N/A"}</p>
-                    <p><b>Email:</b> {item.company_email || "N/A"}</p>
-                    <p><b>Core:</b> {item.core_activity_name || "N/A"}</p>
-                    <p><b>Activity:</b> {item.activity_name || "N/A"}</p>
+                      <p>
+                        <b>Website:</b>{" "}
+                        {item.company_website ? (
+                          <a href={item.company_website} target="_blank" rel="noreferrer">
+                            {item.company_website}
+                          </a>
+                        ) : "N/A"}
+                      </p>
 
-                    {/* BUTTON */}
-                    <button
-                      className="btn btn-primary w-100"
-                      onClick={() => navigate(`/company/${item.id}`)}
-                    >
-                      View Details
-                    </button>
+                      <p><b>Core Activity:</b> {item.core_activity_name || "N/A"}</p>
+                      <p><b>Activity:</b> {item.activity_name || "N/A"}</p>
 
+                      <p><b>Category:</b> {item.category_name || item.category?.name || "N/A"}</p>
+                      <p><b>Sub Category:</b> {item.sub_category_name || "N/A"}</p>
+
+                      <div className="mb-2">
+                        {tags.slice(0, 6).map((tag, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              backgroundColor: "#ff7a00",
+                              color: "#fff",
+                              padding: "4px 8px",
+                              fontSize: "12px",
+                              borderRadius: "4px",
+                              marginRight: "5px",
+                              display: "inline-block"
+                            }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <button
+                        className="btn btn-primary w-100"
+                        onClick={() => navigate(`/company/${item.id}`)}
+                      >
+                        View Details
+                      </button>
+
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
             </div>
           )}
 
-          {/* LOADING MORE */}
+          {/* ================= LOADER ================= */}
+          <div ref={loaderRef} style={{ height: "80px" }} />
+
           {loadingMore && (
-            <p className="text-center text-primary">
-              Loading more companies...
-            </p>
+            <div className="text-center my-3">
+              <div className="spinner-border text-primary" />
+            </div>
           )}
 
           {!hasMore && (
-            <p className="text-center text-muted">
-              No more companies
-            </p>
+            <p className="text-center text-muted">No more companies</p>
           )}
 
         </div>
