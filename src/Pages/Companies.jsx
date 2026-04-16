@@ -19,8 +19,8 @@ const Companies = () => {
   // ✅ COMPONENT SWITCH
   const renderComponent = () => {
     if (type === "sellers") return <Seller />;
-    if (type === "Buyers") return <Buyer />;
-    if (type === "Distributers") return <Distributers />;
+    if (type === "buyers") return <Buyer />;
+    if (type === "distributors") return <Distributers />;
     return <h3>No Data Found</h3>;
   };
 

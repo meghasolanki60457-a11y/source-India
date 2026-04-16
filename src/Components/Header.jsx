@@ -101,7 +101,7 @@ function Header() {
               {/* CATEGORIES */}
               <li className="nav-item">
                 <NavLink
-                  to="/Product-Category"
+                  to="/categories"
                   className={({ isActive }) =>
                     isActive ? "nav-link active" : "nav-link"
                   }
@@ -123,12 +123,12 @@ function Header() {
                     </Link>
                   </li>
                   <li>
-                    <Link className="dropdown-item" to="/companies/Buyers">
+                    <Link className="dropdown-item" to="/buyer-list">
                       Buyers
                     </Link>
                   </li>
                    <li>
-                    <Link className="dropdown-item" to="/companies/Distributers">
+                    <Link className="dropdown-item" to="/trading-list">
                       Distributer
                     </Link>
                   </li>
@@ -136,16 +136,16 @@ function Header() {
               </li>
 
               {/* EVENT */}
-              <li className="nav-item">
-                <NavLink
-                  to="/event"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link active" : "nav-link"
-                  }
-                >
-                  Event
-                </NavLink>
-              </li>
+             <li className="nav-item">
+  <a
+    href="https://event.sourceindia-electronics.com/"
+    className="nav-link"
+    rel="noopener noreferrer"
+  >
+    Event
+  </a>
+</li>
+              
 
               {/* ENQUIRY */}
               <li className="nav-item">

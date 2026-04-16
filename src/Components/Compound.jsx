@@ -8,12 +8,13 @@ const Compound = () => {
 
   const BASE_URL = "https://react-live.sourceindia-electronics.com/v1/";
 
-  const createSlug = (name) => {
-    return name
-      .toLowerCase()
+  // slug generator
+  const createSlug = (text) =>
+    text
+      ?.toLowerCase()
+      .trim()
       .replace(/\s+/g, "-")
-      .replace(/[^\w-]+/g, "");
-  };
+      .replace(/[^\w-]/g, "");
 
   useEffect(() => {
     fetch(
@@ -25,10 +26,7 @@ const Compound = () => {
           ? data
           : data?.data || data?.result || [];
 
-        const selected = list[0];
-        if (!selected) return;
-
-        setCategory(selected);
+        setCategory(list?.[0] || null);
       })
       .catch((err) => console.log(err));
   }, []);
@@ -40,21 +38,13 @@ const Compound = () => {
       <div className="container">
         <div className="row gy-4">
 
-          {/* LEFT IMAGE + BUTTON */}
+          {/* LEFT IMAGE */}
           <div className="col-lg-4">
-            <div className="big-card position-relative">
-
-              <img
-                src={BASE_URL + category.file_name}
-                alt={category.name}
-                className="img-fluid big-image"
-              />
-
-              <button className="btn btn-danger view-btn">
-                View All →
-              </button>
-
-            </div>
+            <img
+              src={BASE_URL + category.file_name}
+              alt={category.name}
+              className="img-fluid"
+            />
           </div>
 
           {/* RIGHT SIDE */}
@@ -62,52 +52,39 @@ const Compound = () => {
             <h2 className="fw-bold mb-4">{category.name}</h2>
 
             <div className="row gy-4">
-              {category.subcategories
-                ?.filter(Boolean)
-                .map((item) => (
-                  <div className="col-md-6" key={item.id}>
-                    <div className="category-card d-flex justify-content-between align-items-start p-3 bg-white shadow-sm">
+              {category.subcategories?.map((item) => (
+                <div className="col-md-6" key={item.id}>
+                  <div className="p-3 shadow-sm d-flex justify-content-between">
 
-                      {/* LEFT TEXT */}
-                      <div style={{ width: "65%" }}>
-                        <div className="d-flex align-items-center mb-2">
-                          <h6 className="fw-bold mb-0">{item.name}</h6>
+                    <div>
+                      <h6 className="fw-bold d-flex align-items-center gap-2">
 
-                          {/* ✅ FIXED CLICK */}
-                          <FaArrowRight
-                            className="ms-2"
-                            style={{ cursor: "pointer" }}
-                            onClick={() =>
-                              navigate(`/category/${createSlug(item.name)}`, {
-                                state: { id: item.id },
-                              })
-                            }
-                          />
-                        </div>
+                        {item.name}
 
-                        <ul className="ps-3 mb-0 sub-list">
-                          {item.item_categories?.map((sub) => (
-                            <li key={sub.id}>{sub.name}</li>
-                          ))}
-                        </ul>
-                      </div>
+                        {/* ✅ ARROW CLICK */}
+                      <FaArrowRight
+  style={{ cursor: "pointer" }}
+  onClick={() =>
+    navigate(`/categories/components/${createSlug(item.name)}`)
+  }
+/>
+                      </h6>
 
-                      {/* RIGHT IMAGE */}
-                      <div style={{ width: "30%", textAlign: "right" }}>
-                        <img
-                          src={BASE_URL + item.file_name}
-                          alt={item.name}
-                          style={{
-                            maxHeight: "100px",
-                            width: "100%",
-                            objectFit: "contain",
-                          }}
-                        />
-                      </div>
-
+                      <ul className="ps-3 mb-0">
+                        {item.item_categories?.map((sub) => (
+                          <li key={sub.id}>{sub.name}</li>
+                        ))}
+                      </ul>
                     </div>
+
+                    <img
+                      src={BASE_URL + item.file_name}
+                      alt={item.name}
+                      style={{ width: "80px" }}
+                    />
                   </div>
-                ))}
+                </div>
+              ))}
             </div>
 
           </div>

@@ -46,17 +46,13 @@ const EnquiryPage = () => {
     fetchData(page);
   }, [page]);
 
-  // ================= 🔥 GUARANTEED INFINITE SCROLL =================
+  // ================= INFINITE SCROLL =================
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         const target = entries[0];
 
-        if (
-          target.isIntersecting &&
-          !loading &&
-          hasMore
-        ) {
+        if (target.isIntersecting && !loading && hasMore) {
           setPage((prev) => prev + 1);
         }
       },
@@ -78,50 +74,44 @@ const EnquiryPage = () => {
 
   return (
     <div className="container mt-4">
-
-      <h3 className="text-center mb-4">
-        All Enquiry
-      </h3>
+      <h3 className="text-center mb-4">All Enquiry</h3>
 
       <div className="row">
+        {data.map((item) => (
+          <div className="col-md-4 mb-4" key={item.id}>
+            <div className="card p-3 h-100">
 
-        {data.map((item) => {
-          const img = item.company_logo
-            ? BASE_URL + item.company_logo
-            : "https://via.placeholder.com/80";
-
-          return (
-            <div className="col-md-4 mb-4" key={item.id}>
-              <div className="card p-3 h-100">
-
+              {/* ================= IMAGE CONDITION FIX ================= */}
+              {item.company_logo && item.company_logo.trim() !== "" && (
                 <img
-                  src={img}
+                  src={BASE_URL + item.company_logo}
+                  alt="logo"
                   style={{
                     width: 80,
                     height: 80,
                     objectFit: "contain",
                     border: "1px solid #eee",
                   }}
+                  onError={(e) => (e.target.style.display = "none")}
                 />
+              )}
 
-                <h5 className="mt-2">{item.title}</h5>
+              <h5 className="mt-2">{item.title}</h5>
 
-                <p>{item.description}</p>
+              <p>{item.description}</p>
 
-                <p>
-                  <b>Name:</b>{" "}
-                  {item.name ||
-                    `${item.fname || ""} ${item.lname || ""}`}
-                </p>
+              <p>
+                <b>Name:</b>{" "}
+                {item.name ||
+                  `${item.fname || ""} ${item.lname || ""}`}
+              </p>
 
-              </div>
             </div>
-          );
-        })}
-
+          </div>
+        ))}
       </div>
 
-      {/* 🔥 VERY IMPORTANT TRIGGER ELEMENT */}
+      {/* 🔥 Infinite Scroll Trigger */}
       <div
         ref={loaderRef}
         style={{
@@ -130,18 +120,11 @@ const EnquiryPage = () => {
         }}
       />
 
-      {loading && (
-        <p className="text-center">
-          Loading...
-        </p>
-      )}
+      {loading && <p className="text-center">Loading...</p>}
 
       {!hasMore && (
-        <p className="text-center text-muted">
-          No more data
-        </p>
+        <p className="text-center text-muted">No more data</p>
       )}
-
     </div>
   );
 };
