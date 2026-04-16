@@ -27,7 +27,7 @@ import Seller from "./Components/Seller";
 
 function App() {
   return (
-    <HelmetProvider>   {/* ✅ FIX ADDED HERE */}
+    <HelmetProvider>
 
       <div className="app-wrapper">
 

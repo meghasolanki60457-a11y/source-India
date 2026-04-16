@@ -12,60 +12,37 @@ import Industries from "../Components/Industries";
 import Featured from "../Components/Featured";
 
 function Home() {
-  const [title, setTitle] = useState("Source India Electronics");
+
+  const [seoTitle, setSeoTitle] = useState("");
 
   useEffect(() => {
-    fetch(
-      "https://react-live.sourceindia-electronics.com/v1/api/seo_pages/slug/home"
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        console.log("SEO RESPONSE:", res);
+    fetch("https://react-live.sourceindia-electronics.com/v1/api/seo_pages/slug/home")
+      .then(res => res.json())
+      .then(data => {
 
-        const data = res?.data;
-        const seo = Array.isArray(data) ? data[0] : data;
+        console.log("API DATA:", data);
 
-        const finalTitle =
-          seo?.meta_title ||
-          seo?.title ||
-          "Source India Electronics | B2B Electronics Supply Chain Portal";
-
-        setTitle(finalTitle);
+        // ✅ ONLY API TITLE (NO FALLBACK)
+        setSeoTitle(data.title);
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch(err => console.log(err));
   }, []);
 
   return (
     <>
-      {/* ✅ SEO TITLE */}
+      {/* ✅ ONLY API TITLE */}
       <Helmet>
-        <title>{title}</title>
+        <title>{seoTitle}</title>
       </Helmet>
 
-      {/* 🔥 HERO SECTION */}
+      {/* PAGE CONTENT */}
       <Hero />
-
-      {/* 🆕 LATEST PRODUCTS */}
       <Latestproduct />
-
-      {/* 🧪 COMPOUND SECTION */}
       <Compound />
-
-      {/* ⚡ ELECTRONIC SECTION */}
       <Electronic />
-
-      {/* 🏭 FINISHED PRODUCTS */}
       <Finishedproduct />
-
-      {/* 🔧 HARDWARE */}
       <Hardware />
-
-      {/* 🏢 INDUSTRIES */}
       <Industries />
-
-      {/* ⭐ FEATURED PRODUCTS */}
       <Featured />
     </>
   );
