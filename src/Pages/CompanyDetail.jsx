@@ -2,167 +2,160 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const CompanyDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
 
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const baseURL = "https://react-live.sourceindia-electronics.com/v1/";
+  const BASE_URL = "https://react-live.sourceindia-electronics.com/v1/";
+
+  // slug → id
+  const companyId = slug?.split("-").pop();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch(
-        `https://react-live.sourceindia-electronics.com/v1/api/products/companies/${id}`
-      );
+    const fetchCompany = async () => {
+      try {
+        setLoading(true);
 
-      const data = await res.json();
-      setCompany(data || null);
-      setLoading(false);
+        const res = await fetch(
+          `${BASE_URL}api/products/companies/${companyId}`
+        );
+
+        const json = await res.json();
+
+        const data =
+          json?.data?.company ||
+          json?.data ||
+          json ||
+          null;
+
+        setCompany(data);
+
+      } catch (err) {
+        console.log(err);
+        setCompany(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchData();
-  }, [id]);
+    if (companyId) fetchCompany();
+  }, [companyId]);
 
   if (loading) return <h3 className="text-center py-5">Loading...</h3>;
   if (!company) return <h3 className="text-center py-5">No Data Found</h3>;
 
   return (
-    <div className="container py-4">
+    <div className="container py-4 company-page">
 
-      {/* ================= TOP CARD ================= */}
-      <div className="card p-4 shadow-sm">
+      {/* ================= BREADCRUMB ================= */}
+      <div className="mb-3">
+        Home / Seller / <b>{company.organization_name}</b>
+      </div>
 
-        <div className="row">
+      <div className="row">
 
-          {/* LEFT SIDE */}
-          <div className="col-md-8">
+        {/* ================= LEFT SECTION ================= */}
+        <div className="col-lg-8">
 
-            <div className="d-flex gap-3 align-items-center mb-3">
+          {/* ================= COMPANY CARD ================= */}
+          <div className="card p-4 mb-4">
 
-              <img
-                src={
-                  company.company_logo_file
-                    ? baseURL + company.company_logo_file
-                    : "https://via.placeholder.com/100"
-                }
-                style={{ width: 80 }}
-              />
+            <img
+              src={
+                company.company_logo_file
+                  ? BASE_URL + company.company_logo_file
+                  : "https://via.placeholder.com/120x80"
+              }
+              alt="logo"
+              style={{
+                width: 120,
+                height: 80,
+                objectFit: "contain",
+                border: "1px solid #eee",
+                padding: 5
+              }}
+            />
 
-              <h4 style={{ color: "orange" }}>
-                {company.organization_name}
-              </h4>
+            <h3 className="mt-2">{company.organization_name}</h3>
 
-            </div>
+            <p><b>Brief:</b> {company.brief_company}</p>
+            <p><b>Location:</b> {company.company_location}</p>
+            <p><b>Address:</b> {company.address}</p>
 
-            <p>
-              📍 <b>Address:</b> {company.address}
-            </p>
+            <p><b>Website:</b> {company.company_website}</p>
 
-            <div className="row">
+            <p><b>Country:</b> {company.country_name}</p>
+            <p><b>State:</b> {company.state_name}</p>
+            <p><b>City:</b> {company.city_name}</p>
 
-              <div className="col-md-6">
-                <p>🌍 <b>Country:</b> {company.country_name}</p>
-                <p>🏙 <b>State:</b> {company.state_name}</p>
-                <p>🏢 <b>City:</b> {company.city_name}</p>
-              </div>
+            <p><b>Core Activity:</b> {company.coreactivity_name}</p>
+            <p><b>Activity:</b> {company.activity_name}</p>
 
-              <div className="col-md-6">
-                <p>📧 <b>Email:</b> {company.email || "N/A"}</p>
-                <p>📞 <b>Phone:</b> {company.phone || "N/A"}</p>
-                <p>🌐 <b>Website:</b> {company.company_website}</p>
-              </div>
-
-            </div>
-
-            <hr />
-
-            <p>
-              <b>Core Activity:</b> {company.coreactivity_name}
-            </p>
+            <p><b>Category:</b> {company.category_name}</p>
+            <p><b>Sub Category:</b> {company.sub_category_name}</p>
 
             <p>
-              <b>Activity:</b> {company.activity_name}
-            </p>
-
-            <p>
-              <b>Category:</b> {company.category_name}
-            </p>
-
-            <p>
-              <b>Sub Category:</b> {company.sub_category_name}
-            </p>
-
-            <hr />
-
-            <p>
-              <b>About:</b> {company.brief_company}
-            </p>
-
-            <p>
+              <b>Description:</b>{" "}
               {company.organizations_product_description}
             </p>
 
           </div>
 
-          {/* RIGHT SIDE (SIDEBAR) */}
-          <div className="col-md-4">
+          {/* ================= PRODUCTS SECTION ================= */}
+          <h4 className="mb-3">Products</h4>
 
-            <div className="border p-3 rounded">
+          <div className="row">
 
-              <h6>⭐ Rating & Review</h6>
+            {(company.products || []).map((item) => (
+              <div className="col-md-3 mb-3" key={item.id}>
 
-              <input className="form-control mb-2" placeholder="Rating" />
-              <textarea className="form-control mb-2" placeholder="Review" />
+                <div className="card p-2 text-center h-100">
 
-              <button className="btn btn-primary w-100">
-                Submit
-              </button>
+                  <img
+                    src={
+                      item.image
+                        ? BASE_URL + item.image
+                        : "https://via.placeholder.com/100"
+                    }
+                    alt={item.title}
+                    style={{
+                      height: 80,
+                      objectFit: "contain"
+                    }}
+                  />
 
-            </div>
+                  <p className="mt-2">{item.title}</p>
 
-            <div className="border p-3 rounded mt-3 text-center">
+                </div>
 
-              <h6>To List Your Product</h6>
-
-              <button className="btn btn-warning w-100">
-                Register Now
-              </button>
-
-            </div>
+              </div>
+            ))}
 
           </div>
 
         </div>
-      </div>
 
-      {/* ================= PRODUCTS ================= */}
-      <h5 className="mt-4">Products</h5>
+        {/* ================= RIGHT SECTION (OPTIONAL LAYOUT LIKE ORIGINAL SITE) ================= */}
+        <div className="col-lg-4">
 
-      <div className="row">
-
-        {(company.products || []).map((item) => (
-          <div className="col-md-3 mb-3" key={item.id}>
-
-            <div className="card text-center p-3">
-
-              <img
-                src={item.image ? baseURL + item.image : ""}
-                style={{ height: 80, objectFit: "contain" }}
-              />
-
-              <p>{item.title}</p>
-
-              <button className="btn btn-primary btn-sm">
-                View →
-              </button>
-
-            </div>
-
+          <div className="card p-3 mb-3">
+            <h6>Company Info</h6>
+            <p>{company.organization_name}</p>
+            <p>{company.company_website}</p>
           </div>
-        ))}
+
+          <div className="card p-3">
+            <h6>Enquiry</h6>
+            <input className="form-control mb-2" placeholder="Name" />
+            <input className="form-control mb-2" placeholder="Email" />
+            <textarea className="form-control mb-2" placeholder="Message" />
+            <button className="btn btn-primary w-100">Send</button>
+          </div>
+
+        </div>
 
       </div>
-
     </div>
   );
 };

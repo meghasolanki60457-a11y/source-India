@@ -80,7 +80,7 @@ const CompanyList = () => {
     }
   }, [page, hasMore]);
 
-  // ================= 🔥 INFINITE SCROLL (STATEFOLDER STYLE) =================
+  // ================= INFINITE SCROLL =================
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -93,11 +93,7 @@ const CompanyList = () => {
           setPage((prev) => prev + 1);
         }
       },
-      {
-        root: null,
-        rootMargin: "100px",
-        threshold: 0,
-      }
+      { root: null, rootMargin: "100px", threshold: 0 }
     );
 
     const current = loaderRef.current;
@@ -114,11 +110,20 @@ const CompanyList = () => {
     item.organization_name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // ================= SLUG FUNCTION =================
+  const createSlug = (text, id) => {
+    return `${text
+      ?.toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "")}-${id}`;
+  };
+
   return (
     <div className="container-fluid mt-3">
       <div className="row">
 
-        {/* ================= SIDEBAR ================= */}
+        {/* SIDEBAR (UNCHANGED) */}
         <div className="col-md-3">
           <div className="border p-3 rounded bg-light">
 
@@ -154,7 +159,7 @@ const CompanyList = () => {
           </div>
         </div>
 
-        {/* ================= MAIN ================= */}
+        {/* MAIN */}
         <div className="col-md-9">
 
           {loading ? (
@@ -183,14 +188,7 @@ const CompanyList = () => {
 
                     <p><b>Location:</b> {item.company_location || "N/A"}</p>
 
-                    <p>
-                      <b>Website:</b>{" "}
-                      {item.company_website ? (
-                        <a href={item.company_website} target="_blank" rel="noreferrer">
-                          {item.company_website}
-                        </a>
-                      ) : "N/A"}
-                    </p>
+                    <p><b>Website:</b> {item.company_website || "N/A"}</p>
 
                     <p><b>Core Activity:</b> {item.core_activity_name || "N/A"}</p>
                     <p><b>Activity:</b> {item.activity_name || "N/A"}</p>
@@ -198,9 +196,14 @@ const CompanyList = () => {
                     <p><b>Category:</b> {item.category_name || "N/A"}</p>
                     <p><b>Sub Category:</b> {item.sub_category_name || "N/A"}</p>
 
+                    {/* ✅ SLUG NAVIGATION FIX */}
                     <button
                       className="btn btn-primary w-100"
-                      onClick={() => navigate(`/company/${item.id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/companies/${createSlug(item.organization_name, item.id)}`
+                        )
+                      }
                     >
                       View Details
                     </button>
@@ -212,7 +215,6 @@ const CompanyList = () => {
             </div>
           )}
 
-          {/* ================= LOADER ================= */}
           <div ref={loaderRef} style={{ height: "80px" }} />
 
           {loadingMore && (

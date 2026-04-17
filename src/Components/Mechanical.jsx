@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 const Mechanical = () => {
   const [data, setData] = useState([]);
+  const [categoryId, setCategoryId] = useState(null);
+  const [subcategoryId, setSubcategoryId] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -11,9 +14,11 @@ const Mechanical = () => {
     )
       .then((res) => res.json())
       .then((result) => {
-        console.log("FULL API:", result);
+        const sub = result?.subcategory;
 
-        setData(result?.subcategory?.item_categories || []);
+        setCategoryId(sub?.category?.id);
+        setSubcategoryId(sub?.id);
+        setData(sub?.item_categories || []);
       })
       .catch((err) => console.log(err));
   }, []);
@@ -32,7 +37,7 @@ const Mechanical = () => {
               {section.name} ({section.product_count})
             </h5>
 
-            {/* 🔥 FIXED ARROW */}
+            {/* ✅ FINAL FIXED URL (COPY-PASTE READY) */}
             <span
               style={{
                 cursor: "pointer",
@@ -40,13 +45,11 @@ const Mechanical = () => {
                 fontWeight: "bold",
                 color: "#0d6efd",
               }}
-              onClick={() => {
-                if (section?.slug) {
-                  navigate(`/category/${section.slug}`);
-                } else {
-                  console.log("Slug missing:", section);
-                }
-              }}
+             onClick={() =>
+  navigate(
+    `/products?type=quality&category_id=${categoryId}&subcategory_id=${subcategoryId}&item_category_id=${section.id}`
+  )
+}
             >
               →
             </span>
@@ -54,53 +57,37 @@ const Mechanical = () => {
           </div>
 
           {/* ITEMS */}
-          {section.items && section.items.length === 0 ? (
-            <p className="text-muted">No items found.</p>
-          ) : (
-            <div className="row">
-              {section.items?.map((item) => (
-                <div
-                  className="col-lg-2 col-md-3 col-sm-6 mb-4"
-                  key={item.id}
-                >
-                  <div className="card p-3 text-center shadow-sm">
+          <div className="row">
+            {section.items?.map((item) => (
+              <div className="col-lg-2 col-md-3 col-sm-6 mb-4" key={item.id}>
+                <div className="card p-3 text-center shadow-sm">
 
-                    {/* IMAGE */}
-                    <div style={{ height: "60px", marginBottom: "10px" }}>
-                      <img
-                        src={
-                          item.file_name
-                            ? `https://react-live.sourceindia-electronics.com/${item.file_name}`
-                            : "https://sourceindia-electronics.com/default.png"
-                        }
-                        alt={item.name}
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          objectFit: "contain",
-                        }}
-                        onError={(e) => {
-                          e.target.src =
-                            "https://sourceindia-electronics.com/default.png";
-                        }}
-                      />
-                    </div>
+                  <img
+                    src={
+                      item.file_name
+                        ? `https://react-live.sourceindia-electronics.com/${item.file_name}`
+                        : "https://sourceindia-electronics.com/default.png"
+                    }
+                    alt={item.name}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      objectFit: "contain",
+                    }}
+                  />
 
-                    {/* NAME */}
-                    <h6 style={{ fontSize: "14px" }}>
-                      {item.name}
-                    </h6>
+                  <h6 style={{ fontSize: "14px" }}>
+                    {item.name}
+                  </h6>
 
-                    {/* COUNT */}
-                    <p className="text-muted">
-                      ({item.product_count})
-                    </p>
+                  <p className="text-muted">
+                    ({item.product_count})
+                  </p>
 
-                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
 
         </div>
       ))}

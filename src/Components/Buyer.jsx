@@ -14,7 +14,15 @@ const Buyer = () => {
 
   const baseURL = "https://react-live.sourceindia-electronics.com/v1/";
 
-  // ================= FETCH COMPANIES =================
+  // ✅ SLUG FUNCTION (SAFE)
+  const createSlug = (name) => {
+    return name
+      ?.toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]/g, "");
+  };
+
   const fetchCompanies = async (pageNo = 1) => {
     setLoading(true);
 
@@ -34,14 +42,13 @@ const Buyer = () => {
     setLoading(false);
   };
 
-  // ================= FETCH CATEGORIES =================
   const fetchCategories = async () => {
     const res = await fetch(
       `${baseURL}api/categories?is_delete=0&status=1`
     );
 
     const data = await res.json();
-    setCategories(data?.data || data || []);
+    setCategories(data?.data || []);
   };
 
   useEffect(() => {
@@ -49,7 +56,6 @@ const Buyer = () => {
     fetchCategories();
   }, []);
 
-  // ================= 🔥 INFINITE SCROLL =================
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -66,17 +72,11 @@ const Buyer = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, loading]);
 
-  // ================= PAGE CHANGE =================
   useEffect(() => {
-    if (page > 1) {
-      fetchCompanies(page);
-
-      // ❌ FIX: removed scrollToTop (THIS WAS THE BUG)
-    }
+    if (page > 1) fetchCompanies(page);
   }, [page]);
 
   const getImage = (item) => {
@@ -87,46 +87,31 @@ const Buyer = () => {
 
   return (
     <div className="container-fluid">
-
       <div className="row">
 
-        {/* ================= SIDEBAR ================= */}
+        {/* SIDEBAR SAME */}
         <div className="col-md-3">
-
           <div className="bg-primary text-white p-2 fw-bold">
             Company Name
           </div>
 
-          <input
-            className="form-control mb-3"
-            placeholder="Search companies..."
-          />
+          <input className="form-control mb-3" placeholder="Search companies..." />
 
           <div className="bg-primary text-white p-2 fw-bold">
             Item Category
           </div>
 
-          <div
-            style={{
-              maxHeight: 450,
-              overflowY: "auto",
-              border: "1px solid #ddd",
-              padding: 5,
-            }}
-          >
+          <div style={{ maxHeight: 450, overflowY: "auto", border: "1px solid #ddd", padding: 5 }}>
             {categories.map((cat) => (
-              <div key={cat.id} style={{ padding: "5px" }}>
-                <input type="checkbox" />{" "}
-                {cat.name || cat.category_name || "N/A"}
+              <div key={cat.id}>
+                <input type="checkbox" /> {cat.name}
               </div>
             ))}
           </div>
-
         </div>
 
-        {/* ================= MAIN ================= */}
+        {/* MAIN */}
         <div className="col-md-9">
-
           <div className="row">
 
             {companies.map((item) => (
@@ -135,64 +120,46 @@ const Buyer = () => {
                 <div className="border bg-white p-3 h-100">
 
                   <div className="d-flex gap-2">
-
                     <img
                       src={getImage(item)}
-                      style={{
-                        width: 70,
-                        height: 70,
-                        objectFit: "contain",
-                        border: "1px solid #ddd",
-                      }}
+                      style={{ width: 70, height: 70, objectFit: "contain" }}
                     />
 
                     <div>
-                      <h6 className="mb-1">
-                        {item.organization_name}
-                      </h6>
-                      <small>
-                        {item.company_location || "N/A"}
-                      </small>
+                      <h6>{item.organization_name}</h6>
+                      <small>{item.company_location || "N/A"}</small>
                     </div>
-
                   </div>
 
                   <p className="mt-2 mb-2">
                     <b>Product:</b>{" "}
-                    {item.product_name ||
-                      item.products?.map((p) => p.name).join(", ") ||
-                      item.user?.products ||
-                      "N/A"}
+                    {item.products?.map((p) => p.title).join(", ") || "N/A"}
                   </p>
 
+                  {/* 🔥 ONLY SLUG USED */}
                   <button
                     className="btn w-100"
-                    style={{
-                      background: "#ff6a00",
-                      color: "#fff",
-                    }}
-                    onClick={() =>
-                      navigate(`/buyer-connect/${item.id}`)
-                    }
+                    style={{ background: "#ff6a00", color: "#fff" }}
+                 onClick={() =>
+  navigate(`/buyer/${createSlug(item.organization_name)}`, {
+    replace: true,
+    state: { slugOnly: true }
+  })
+}
                   >
                     Connect
                   </button>
 
                 </div>
-
               </div>
             ))}
 
           </div>
 
-          {loading && (
-            <p className="text-center">Loading...</p>
-          )}
-
+          {loading && <p className="text-center">Loading...</p>}
         </div>
 
       </div>
-
     </div>
   );
 };

@@ -5,7 +5,7 @@ const Display = () => {
   const [categories, setCategories] = useState([]);
   const [title, setTitle] = useState("");
 
-  const navigate = useNavigate(); // ✅ added
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(
@@ -21,9 +21,11 @@ const Display = () => {
       .catch((err) => console.log(err));
   }, []);
 
-  // ✅ arrow click handler
+  // ✅ arrow click handler (ONLY CHANGE HERE)
   const handleArrowClick = (section) => {
-    navigate(`/category/${section.id || section.slug || section.name}`);
+    navigate(
+      `/products?category_id=1&subcategory_id=20&item_category_id=${section.id}`
+    );
   };
 
   return (
@@ -42,7 +44,7 @@ const Display = () => {
               {section.name} ({section.product_count})
             </h5>
 
-            {/* ✅ CLICKABLE ARROW */}
+            {/* ✅ CLICKABLE ARROW → PRODUCTS PAGE */}
             <span
               className="arrow"
               style={{ cursor: "pointer", fontSize: "20px" }}
@@ -84,6 +86,7 @@ const Display = () => {
 
         </div>
       ))}
+
     </div>
   );
 };

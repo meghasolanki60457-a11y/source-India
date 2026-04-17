@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Capacitor = () => {
   const [categories, setCategories] = useState([]);
   const [title, setTitle] = useState("");
+
+  const navigate = useNavigate(); // ✅ added
 
   useEffect(() => {
     fetch(
@@ -12,7 +15,6 @@ const Capacitor = () => {
       .then((data) => {
         console.log("API RESPONSE:", data);
 
-        // ✅ correct mapping
         setCategories(data?.subcategory?.item_categories || []);
         setTitle(data?.subcategory?.name || "");
       })
@@ -21,7 +23,8 @@ const Capacitor = () => {
 
   return (
     <div className="container mt-4">
-      {/* ✅ Dynamic Title */}
+
+      {/* Title */}
       <h3 className="mb-4">{title}</h3>
 
       {categories.map((section, index) => (
@@ -29,10 +32,24 @@ const Capacitor = () => {
 
           {/* Section Header */}
           <div className="d-flex justify-content-between align-items-center mb-3">
+
             <h5 className="section-title">
               {section.name} ({section.product_count})
             </h5>
-            <span className="arrow">→</span>
+
+            {/* ✅ ARROW CLICK → PRODUCT PAGE */}
+            <span
+              className="arrow"
+              style={{ cursor: "pointer", fontSize: "20px" }}
+              onClick={() =>
+                navigate(
+                  `/products?category_id=1&subcategory_id=20&item_category_id=${section.id}`
+                )
+              }
+            >
+              →
+            </span>
+
           </div>
 
           {/* Cards */}
@@ -41,23 +58,20 @@ const Capacitor = () => {
               <div key={i} className="col-md-3 col-sm-6 mb-3">
                 <div className="card custom-card text-center p-3">
 
-                  {/* ✅ Image FIX */}
-               <img
-  src={
-    item.file_name
-      ? `https://react-live.sourceindia-electronics.com/v1/${item.file_name}`
-      : "http://sourceindia-electronics.com/default.png"
-  }
-  alt={item.name}
-  className="card-img mb-2"
-/>
+                  <img
+                    src={
+                      item.file_name
+                        ? `https://react-live.sourceindia-electronics.com/v1/${item.file_name}`
+                        : "http://sourceindia-electronics.com/default.png"
+                    }
+                    alt={item.name}
+                    className="card-img mb-2"
+                  />
 
-                  {/* Title */}
                   <a href="#" className="card-title">
                     {item.name}
                   </a>
 
-                  {/* Count */}
                   <div className="count">
                     ({item.product_count})
                   </div>
@@ -69,6 +83,7 @@ const Capacitor = () => {
 
         </div>
       ))}
+
     </div>
   );
 };

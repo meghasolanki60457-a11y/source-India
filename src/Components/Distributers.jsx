@@ -15,7 +15,6 @@ const TradingList = () => {
 
     const BASE_URL = "https://react-live.sourceindia-electronics.com/v1/";
 
-    // ================= FULL SIDEBAR DATA =================
     const [categories, setCategories] = useState([]);
     const [states, setStates] = useState([]);
     const [coreActivities, setCoreActivities] = useState([]);
@@ -38,7 +37,6 @@ const TradingList = () => {
             .then(data => setCoreActivities(data?.data || []));
     }, []);
 
-    // ================= COMPANY API (FIXED APPEND ONLY) =================
     const fetchCompanies = async (pageNo) => {
         try {
             setLoading(true);
@@ -48,10 +46,8 @@ const TradingList = () => {
             );
 
             const data = await res.json();
-
             const newCompanies = data?.companies || [];
 
-            // 🔥 FIX ONLY (NO DELETE)
             setCompanies((prev) => [...prev, ...newCompanies]);
 
             if (newCompanies.length < 12) {
@@ -69,7 +65,6 @@ const TradingList = () => {
         fetchCompanies(page);
     }, [page]);
 
-    // ================= INFINITE SCROLL =================
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -81,7 +76,6 @@ const TradingList = () => {
         );
 
         const current = loaderRef.current;
-
         if (current) observer.observe(current);
 
         return () => {
@@ -89,12 +83,10 @@ const TradingList = () => {
         };
     }, [hasMore, loading]);
 
-    // ================= FILTER =================
     const filtered = companies.filter(item =>
         item.organization_name?.toLowerCase().includes(search.toLowerCase())
     );
 
-    // ================= IMAGE =================
     const getImage = (item) => {
         if (item?.company_logo_file) {
             return `${BASE_URL}${item.company_logo_file}`;
@@ -102,13 +94,22 @@ const TradingList = () => {
         return "https://sourceindia-electronics.com/default.png";
     };
 
+    // 🔥 SLUG FUNCTION (IMPORTANT)
+    const createSlug = (item) => {
+        const name = item.organization_name
+            ?.toLowerCase()
+            .replace(/&/g, "and")
+            .replace(/\s+/g, "-");
+
+        return `${name}-${item.id}`;
+    };
+
     return (
         <div className="container-fluid mt-3">
             <div className="row">
 
-                {/* ================= SIDEBAR (FULL RESTORED) ================= */}
+                {/* SIDEBAR SAME */}
                 <div className="col-md-3">
-
                     <input
                         className="form-control mb-3"
                         placeholder="Search companies..."
@@ -136,10 +137,9 @@ const TradingList = () => {
                             <input type="checkbox" /> {s.name}
                         </div>
                     ))}
-
                 </div>
 
-                {/* ================= MAIN ================= */}
+                {/* MAIN */}
                 <div className="col-md-9">
                     <div className="row">
 
@@ -156,14 +156,8 @@ const TradingList = () => {
                                         <div className="d-flex gap-3 align-items-center">
                                             <img
                                                 src={getImage(item)}
-                                                alt=""
-                                                style={{
-                                                    width: 80,
-                                                    height: 80,
-                                                    objectFit: "contain"
-                                                }}
+                                                style={{ width: 80, height: 80, objectFit: "contain" }}
                                             />
-
                                             <h5>{item.organization_name}</h5>
                                         </div>
 
@@ -176,7 +170,6 @@ const TradingList = () => {
                                         <p><b>Category:</b> {item.category_name || "N/A"}</p>
                                         <p><b>Sub Category:</b> {item.sub_category_name || "N/A"}</p>
 
-                                        {/* PRODUCTS / TAGS (RESTORED) */}
                                         <div>
                                             {tags.slice(0, 6).map((t, i) => (
                                                 <span key={i}
@@ -193,9 +186,12 @@ const TradingList = () => {
                                             ))}
                                         </div>
 
+                                        {/* 🔥 FIXED SLUG NAVIGATION */}
                                         <button
                                             className="btn btn-primary w-100 mt-3"
-                                            onClick={() => navigate(`/company/${item.id}`)}
+                                            onClick={() =>
+                                                navigate(`/companies/${createSlug(item)}`)
+                                            }
                                         >
                                             View Details
                                         </button>
@@ -207,11 +203,9 @@ const TradingList = () => {
 
                     </div>
 
-                    {/* ================= SCROLL TRIGGER ================= */}
                     <div ref={loaderRef} style={{ height: 80 }} />
 
                     {loading && <p className="text-center">Loading...</p>}
-
                     {!hasMore && <p className="text-center">No more data</p>}
                 </div>
 

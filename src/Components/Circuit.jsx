@@ -19,34 +19,28 @@ const Circuit = () => {
       .catch((err) => console.log(err));
   }, []);
 
-  // ✅ FINAL CLICK HANDLER
+  // ✅ ONLY CHANGE HERE (SAFE + SIMPLE)
   const handleArrowClick = (section) => {
-    if (!section) return;
-
-    // ✅ slug safe banao (important)
-    const slug = encodeURIComponent(
-      section.slug || section.name || section.id
+    navigate(
+      `/products?category_id=1&subcategory_id=20&item_category_id=${section.id}`
     );
-
-    console.log("Navigating to:", `/category/${slug}`);
-
-    // ✅ CORRECT ROUTE (App.jsx ke hisaab se)
-    navigate(`/category/${slug}`);
   };
 
   return (
     <div className="container mt-4">
+
       <h3 className="mb-4">{title}</h3>
 
       {categories.map((section, index) => (
         <div key={index} className="section-box mb-4">
 
           <div className="d-flex justify-content-between align-items-center mb-3">
+
             <h5 className="section-title">
               {section.name} ({section.product_count})
             </h5>
 
-            {/* ✅ CLICKABLE ARROW */}
+            {/* ✅ CLICK → PRODUCTS PAGE */}
             <span
               className="arrow"
               style={{ cursor: "pointer", fontSize: "20px" }}
@@ -54,6 +48,7 @@ const Circuit = () => {
             >
               →
             </span>
+
           </div>
 
           <div className="row">
@@ -86,6 +81,7 @@ const Circuit = () => {
 
         </div>
       ))}
+
     </div>
   );
 };
